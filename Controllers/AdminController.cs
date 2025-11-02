@@ -16,10 +16,12 @@ namespace LinkojaMicroservice.Controllers
     public class AdminController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly Services.INotificationService _notificationService;
 
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, Services.INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpGet("businesses/pending")]
@@ -61,6 +63,20 @@ namespace LinkojaMicroservice.Controllers
                 business.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
+
+                // Send notification to business owner
+                var notificationTitle = request.Status == "verified" ? "Business Approved" : "Business Rejected";
+                var notificationMessage = request.Status == "verified"
+                    ? $"Congratulations! Your business '{business.Name}' has been verified and is now live."
+                    : $"Your business '{business.Name}' was not approved. {request.Reason ?? ""}";
+
+                await _notificationService.CreateNotification(
+                    business.OwnerId,
+                    "approval",
+                    notificationTitle,
+                    notificationMessage,
+                    id
+                );
 
                 return Ok(new { message = $"Business {request.Status} successfully", business });
             }

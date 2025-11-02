@@ -12,10 +12,12 @@ namespace LinkojaMicroservice.Services
     public class BusinessService : IBusinessService
     {
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public BusinessService(ApplicationDbContext context)
+        public BusinessService(ApplicationDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<Business> CreateBusiness(int ownerId, CreateBusinessRequest request)
@@ -178,6 +180,15 @@ namespace LinkojaMicroservice.Services
             _context.BusinessReviews.Add(review);
             await _context.SaveChangesAsync();
 
+            // Send notification to business owner
+            await _notificationService.CreateNotification(
+                business.OwnerId,
+                "review",
+                "New Review",
+                $"Your business '{business.Name}' received a new {request.Rating}-star review",
+                businessId
+            );
+
             return review;
         }
 
@@ -206,6 +217,16 @@ namespace LinkojaMicroservice.Services
 
             _context.BusinessFollowers.Add(follower);
             await _context.SaveChangesAsync();
+
+            // Send notification to business owner
+            var user = await _context.Users.FindAsync(userId);
+            await _notificationService.CreateNotification(
+                business.OwnerId,
+                "follower",
+                "New Follower",
+                $"{user?.Name ?? "Someone"} started following your business '{business.Name}'",
+                businessId
+            );
 
             return true;
         }

@@ -17,6 +17,7 @@ namespace LinkojaMicroservice.Data
         public DbSet<BusinessPost> BusinessPosts { get; set; }
         public DbSet<BusinessCategory> BusinessCategories { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -99,6 +100,20 @@ namespace LinkojaMicroservice.Data
                     .HasForeignKey(e => e.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(e => e.Token).IsUnique();
+            });
+
+            // Configure Notification entity
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.RelatedBusiness)
+                    .WithMany()
+                    .HasForeignKey(e => e.RelatedBusinessId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
         }
     }
