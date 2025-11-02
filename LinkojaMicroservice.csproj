@@ -22,4 +22,11 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Copy SQL scripts to output directory for auto-initialization -->
+    <None Update="Database\**\*.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

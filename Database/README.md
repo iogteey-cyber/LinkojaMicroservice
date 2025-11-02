@@ -6,11 +6,12 @@ This directory contains SQL scripts for setting up the Linkoja Microservice data
 
 ### `CreateTables.sql`
 Complete database schema creation script for PostgreSQL. This script:
-- Drops existing tables (if any)
+- Uses `CREATE TABLE IF NOT EXISTS` for idempotent execution
 - Creates all 11 tables with proper relationships
 - Adds indexes for performance optimization
 - Includes foreign key constraints
-- Creates a default admin user
+- Creates a default admin user (if not exists)
+- **Auto-runs on application startup** (no manual execution needed)
 
 ## Database Tables
 
@@ -29,12 +30,35 @@ The schema includes the following tables:
 
 ## Usage
 
-### Prerequisites
-- PostgreSQL 12 or higher
-- Database created (e.g., `linkoja_db`)
-- Appropriate user permissions
+### Automatic Initialization (Recommended)
 
-### Running the Script
+The database tables are **automatically created** when you run the application:
+
+1. Ensure your PostgreSQL server is running
+2. Configure the connection string in `appsettings.json`:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Database=linkoja_db;Username=postgres;Password=yourpassword"
+  }
+}
+```
+3. Run the application:
+```bash
+dotnet run
+```
+
+The `DatabaseInitializer` service will:
+- Read the `CreateTables.sql` script
+- Execute it on startup
+- Create tables only if they don't already exist
+- Log the initialization process
+
+**Note**: The auto-initialization is idempotent - running it multiple times is safe and will not drop existing data.
+
+### Manual Execution (Alternative)
+
+If you prefer to run the script manually:
 
 #### Option 1: Using psql command line
 ```bash

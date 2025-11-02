@@ -2,25 +2,14 @@
 -- Linkoja Microservice Database Schema
 -- Database: PostgreSQL
 -- Description: Complete database schema for Linkoja platform
+-- Note: Uses CREATE TABLE IF NOT EXISTS for idempotent execution
 -- =============================================
-
--- Drop tables if they exist (in reverse order of dependencies)
-DROP TABLE IF EXISTS "ReviewReports" CASCADE;
-DROP TABLE IF EXISTS "OtpVerifications" CASCADE;
-DROP TABLE IF EXISTS "Notifications" CASCADE;
-DROP TABLE IF EXISTS "PasswordResetTokens" CASCADE;
-DROP TABLE IF EXISTS "BusinessCategories" CASCADE;
-DROP TABLE IF EXISTS "BusinessPosts" CASCADE;
-DROP TABLE IF EXISTS "BusinessFollowers" CASCADE;
-DROP TABLE IF EXISTS "BusinessReviews" CASCADE;
-DROP TABLE IF EXISTS "Businesses" CASCADE;
-DROP TABLE IF EXISTS "Users" CASCADE;
 
 -- =============================================
 -- Table: Users
 -- Description: Stores user accounts (customers, business owners, admins)
 -- =============================================
-CREATE TABLE "Users" (
+CREATE TABLE IF NOT EXISTS "Users" (
     "Id" SERIAL PRIMARY KEY,
     "Email" VARCHAR(255) NOT NULL UNIQUE,
     "Phone" VARCHAR(20),
@@ -34,15 +23,15 @@ CREATE TABLE "Users" (
     "UpdatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX "idx_users_email" ON "Users"("Email");
-CREATE INDEX "idx_users_role" ON "Users"("Role");
-CREATE INDEX "idx_users_social" ON "Users"("AuthProvider", "SocialId");
+CREATE INDEX IF NOT EXISTS "idx_users_email" ON "Users"("Email");
+CREATE INDEX IF NOT EXISTS "idx_users_role" ON "Users"("Role");
+CREATE INDEX IF NOT EXISTS "idx_users_social" ON "Users"("AuthProvider", "SocialId");
 
 -- =============================================
 -- Table: Businesses
 -- Description: Stores business profiles
 -- =============================================
-CREATE TABLE "Businesses" (
+CREATE TABLE IF NOT EXISTS "Businesses" (
     "Id" SERIAL PRIMARY KEY,
     "OwnerId" INTEGER NOT NULL,
     "Name" VARCHAR(255) NOT NULL,
@@ -60,16 +49,16 @@ CREATE TABLE "Businesses" (
     CONSTRAINT "fk_business_owner" FOREIGN KEY ("OwnerId") REFERENCES "Users"("Id") ON DELETE CASCADE
 );
 
-CREATE INDEX "idx_businesses_owner" ON "Businesses"("OwnerId");
-CREATE INDEX "idx_businesses_status" ON "Businesses"("Status");
-CREATE INDEX "idx_businesses_category" ON "Businesses"("Category");
-CREATE INDEX "idx_businesses_location" ON "Businesses"("Latitude", "Longitude");
+CREATE INDEX IF NOT EXISTS "idx_businesses_owner" ON "Businesses"("OwnerId");
+CREATE INDEX IF NOT EXISTS "idx_businesses_status" ON "Businesses"("Status");
+CREATE INDEX IF NOT EXISTS "idx_businesses_category" ON "Businesses"("Category");
+CREATE INDEX IF NOT EXISTS "idx_businesses_location" ON "Businesses"("Latitude", "Longitude");
 
 -- =============================================
 -- Table: BusinessReviews
 -- Description: Stores customer reviews for businesses
 -- =============================================
-CREATE TABLE "BusinessReviews" (
+CREATE TABLE IF NOT EXISTS "BusinessReviews" (
     "Id" SERIAL PRIMARY KEY,
     "BusinessId" INTEGER NOT NULL,
     "UserId" INTEGER NOT NULL,
@@ -83,15 +72,15 @@ CREATE TABLE "BusinessReviews" (
     CONSTRAINT "unique_user_business_review" UNIQUE ("BusinessId", "UserId")
 );
 
-CREATE INDEX "idx_reviews_business" ON "BusinessReviews"("BusinessId");
-CREATE INDEX "idx_reviews_user" ON "BusinessReviews"("UserId");
-CREATE INDEX "idx_reviews_rating" ON "BusinessReviews"("Rating");
+CREATE INDEX IF NOT EXISTS "idx_reviews_business" ON "BusinessReviews"("BusinessId");
+CREATE INDEX IF NOT EXISTS "idx_reviews_user" ON "BusinessReviews"("UserId");
+CREATE INDEX IF NOT EXISTS "idx_reviews_rating" ON "BusinessReviews"("Rating");
 
 -- =============================================
 -- Table: BusinessFollowers
 -- Description: Tracks which users follow which businesses
 -- =============================================
-CREATE TABLE "BusinessFollowers" (
+CREATE TABLE IF NOT EXISTS "BusinessFollowers" (
     "Id" SERIAL PRIMARY KEY,
     "BusinessId" INTEGER NOT NULL,
     "UserId" INTEGER NOT NULL,
@@ -101,14 +90,14 @@ CREATE TABLE "BusinessFollowers" (
     CONSTRAINT "unique_follower" UNIQUE ("BusinessId", "UserId")
 );
 
-CREATE INDEX "idx_followers_business" ON "BusinessFollowers"("BusinessId");
-CREATE INDEX "idx_followers_user" ON "BusinessFollowers"("UserId");
+CREATE INDEX IF NOT EXISTS "idx_followers_business" ON "BusinessFollowers"("BusinessId");
+CREATE INDEX IF NOT EXISTS "idx_followers_user" ON "BusinessFollowers"("UserId");
 
 -- =============================================
 -- Table: BusinessPosts
 -- Description: Stores posts/updates created by businesses
 -- =============================================
-CREATE TABLE "BusinessPosts" (
+CREATE TABLE IF NOT EXISTS "BusinessPosts" (
     "Id" SERIAL PRIMARY KEY,
     "BusinessId" INTEGER NOT NULL,
     "Content" TEXT NOT NULL,
@@ -121,14 +110,14 @@ CREATE TABLE "BusinessPosts" (
     CONSTRAINT "fk_post_business" FOREIGN KEY ("BusinessId") REFERENCES "Businesses"("Id") ON DELETE CASCADE
 );
 
-CREATE INDEX "idx_posts_business" ON "BusinessPosts"("BusinessId");
-CREATE INDEX "idx_posts_created" ON "BusinessPosts"("CreatedAt" DESC);
+CREATE INDEX IF NOT EXISTS "idx_posts_business" ON "BusinessPosts"("BusinessId");
+CREATE INDEX IF NOT EXISTS "idx_posts_created" ON "BusinessPosts"("CreatedAt" DESC);
 
 -- =============================================
 -- Table: BusinessCategories
 -- Description: Stores category tags for businesses (many-to-many relationship)
 -- =============================================
-CREATE TABLE "BusinessCategories" (
+CREATE TABLE IF NOT EXISTS "BusinessCategories" (
     "Id" SERIAL PRIMARY KEY,
     "BusinessId" INTEGER NOT NULL,
     "CategoryName" VARCHAR(100) NOT NULL,
@@ -136,14 +125,14 @@ CREATE TABLE "BusinessCategories" (
     CONSTRAINT "fk_category_business" FOREIGN KEY ("BusinessId") REFERENCES "Businesses"("Id") ON DELETE CASCADE
 );
 
-CREATE INDEX "idx_categories_business" ON "BusinessCategories"("BusinessId");
-CREATE INDEX "idx_categories_name" ON "BusinessCategories"("CategoryName");
+CREATE INDEX IF NOT EXISTS "idx_categories_business" ON "BusinessCategories"("BusinessId");
+CREATE INDEX IF NOT EXISTS "idx_categories_name" ON "BusinessCategories"("CategoryName");
 
 -- =============================================
 -- Table: PasswordResetTokens
 -- Description: Stores password reset tokens for users
 -- =============================================
-CREATE TABLE "PasswordResetTokens" (
+CREATE TABLE IF NOT EXISTS "PasswordResetTokens" (
     "Id" SERIAL PRIMARY KEY,
     "UserId" INTEGER NOT NULL,
     "Token" VARCHAR(255) NOT NULL UNIQUE,
@@ -153,15 +142,15 @@ CREATE TABLE "PasswordResetTokens" (
     CONSTRAINT "fk_reset_token_user" FOREIGN KEY ("UserId") REFERENCES "Users"("Id") ON DELETE CASCADE
 );
 
-CREATE INDEX "idx_reset_tokens_user" ON "PasswordResetTokens"("UserId");
-CREATE INDEX "idx_reset_tokens_token" ON "PasswordResetTokens"("Token");
-CREATE INDEX "idx_reset_tokens_expiry" ON "PasswordResetTokens"("ExpiresAt");
+CREATE INDEX IF NOT EXISTS "idx_reset_tokens_user" ON "PasswordResetTokens"("UserId");
+CREATE INDEX IF NOT EXISTS "idx_reset_tokens_token" ON "PasswordResetTokens"("Token");
+CREATE INDEX IF NOT EXISTS "idx_reset_tokens_expiry" ON "PasswordResetTokens"("ExpiresAt");
 
 -- =============================================
 -- Table: Notifications
 -- Description: Stores in-app notifications for users
 -- =============================================
-CREATE TABLE "Notifications" (
+CREATE TABLE IF NOT EXISTS "Notifications" (
     "Id" SERIAL PRIMARY KEY,
     "UserId" INTEGER NOT NULL,
     "Type" VARCHAR(50) NOT NULL, -- 'follower', 'review', 'approval', 'comment'
@@ -174,15 +163,15 @@ CREATE TABLE "Notifications" (
     CONSTRAINT "fk_notification_business" FOREIGN KEY ("RelatedBusinessId") REFERENCES "Businesses"("Id") ON DELETE SET NULL
 );
 
-CREATE INDEX "idx_notifications_user" ON "Notifications"("UserId");
-CREATE INDEX "idx_notifications_read" ON "Notifications"("IsRead");
-CREATE INDEX "idx_notifications_created" ON "Notifications"("CreatedAt" DESC);
+CREATE INDEX IF NOT EXISTS "idx_notifications_user" ON "Notifications"("UserId");
+CREATE INDEX IF NOT EXISTS "idx_notifications_read" ON "Notifications"("IsRead");
+CREATE INDEX IF NOT EXISTS "idx_notifications_created" ON "Notifications"("CreatedAt" DESC);
 
 -- =============================================
 -- Table: OtpVerifications
 -- Description: Stores OTP codes for phone number verification
 -- =============================================
-CREATE TABLE "OtpVerifications" (
+CREATE TABLE IF NOT EXISTS "OtpVerifications" (
     "Id" SERIAL PRIMARY KEY,
     "PhoneNumber" VARCHAR(20) NOT NULL,
     "OtpCode" VARCHAR(10) NOT NULL,
@@ -192,14 +181,14 @@ CREATE TABLE "OtpVerifications" (
     "CreatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX "idx_otp_phone" ON "OtpVerifications"("PhoneNumber");
-CREATE INDEX "idx_otp_expiry" ON "OtpVerifications"("ExpiresAt");
+CREATE INDEX IF NOT EXISTS "idx_otp_phone" ON "OtpVerifications"("PhoneNumber");
+CREATE INDEX IF NOT EXISTS "idx_otp_expiry" ON "OtpVerifications"("ExpiresAt");
 
 -- =============================================
 -- Table: ReviewReports
 -- Description: Stores abuse reports for reviews
 -- =============================================
-CREATE TABLE "ReviewReports" (
+CREATE TABLE IF NOT EXISTS "ReviewReports" (
     "Id" SERIAL PRIMARY KEY,
     "ReviewId" INTEGER NOT NULL,
     "ReportedByUserId" INTEGER NOT NULL,
@@ -213,22 +202,24 @@ CREATE TABLE "ReviewReports" (
     CONSTRAINT "unique_user_review_report" UNIQUE ("ReviewId", "ReportedByUserId")
 );
 
-CREATE INDEX "idx_reports_review" ON "ReviewReports"("ReviewId");
-CREATE INDEX "idx_reports_user" ON "ReviewReports"("ReportedByUserId");
-CREATE INDEX "idx_reports_status" ON "ReviewReports"("Status");
+CREATE INDEX IF NOT EXISTS "idx_reports_review" ON "ReviewReports"("ReviewId");
+CREATE INDEX IF NOT EXISTS "idx_reports_user" ON "ReviewReports"("ReportedByUserId");
+CREATE INDEX IF NOT EXISTS "idx_reports_status" ON "ReviewReports"("Status");
 
 -- =============================================
 -- Insert Sample Admin User (Password: Admin123!)
 -- Note: Replace this hash with actual BCrypt hash in production
 -- =============================================
 INSERT INTO "Users" ("Email", "PasswordHash", "Name", "Role", "IsPhoneVerified", "AuthProvider")
-VALUES (
+SELECT 
     'admin@linkoja.com',
     '$2a$11$xYzV8UWQ0kK6YqX5PzJE7.9bQZGJF5LJV2W2qK5YqX5PzJE7.9bQZG', -- BCrypt hash for 'Admin123!'
     'System Administrator',
     'admin',
     true,
     'local'
+WHERE NOT EXISTS (
+    SELECT 1 FROM "Users" WHERE "Email" = 'admin@linkoja.com'
 );
 
 -- =============================================

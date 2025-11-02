@@ -37,6 +37,7 @@ namespace LinkojaMicroservice
             services.AddScoped<LinkojaMicroservice.Services.INotificationService, LinkojaMicroservice.Services.NotificationService>();
             services.AddScoped<LinkojaMicroservice.Services.IOtpService, LinkojaMicroservice.Services.OtpService>();
             services.AddScoped<LinkojaMicroservice.Services.IEmailService, LinkojaMicroservice.Services.EmailService>();
+            services.AddScoped<DatabaseInitializer>();
 
             // JWT authentication
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -89,8 +90,11 @@ namespace LinkojaMicroservice
             });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseInitializer dbInitializer)
         {
+            // Initialize database on startup (auto-run SQL script)
+            dbInitializer.InitializeAsync().GetAwaiter().GetResult();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
