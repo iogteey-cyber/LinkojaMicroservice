@@ -2,6 +2,7 @@ using LinkojaMicroservice.DTOs;
 using LinkojaMicroservice.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -13,15 +14,18 @@ namespace LinkojaMicroservice.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, ILogger<AuthController> logger)
         {
             _authService = authService;
+            _logger = logger;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
+            _logger.LogInformation("User registration attempt for email: {Email}", request.Email);
             try
             {
                 var user = await _authService.Register(request.Email, request.Password, request.Phone, request.Name);
@@ -40,10 +44,12 @@ namespace LinkojaMicroservice.Controllers
                     }
                 };
 
+                _logger.LogInformation("User registered successfully: {Email}, UserId: {UserId}", user.Email, user.Id);
                 return Ok(response);
             }
             catch (InvalidOperationException ex)
             {
+                _logger.LogWarning("Registration failed for {Email}: {Message}", request.Email, ex.Message);
                 return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
