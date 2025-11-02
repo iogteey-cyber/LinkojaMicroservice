@@ -10,10 +10,12 @@ namespace LinkojaMicroservice.Services
     public class OtpService : IOtpService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public OtpService(ApplicationDbContext context)
+        public OtpService(ApplicationDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         public async Task<bool> SendOtp(string phoneNumber)
@@ -57,6 +59,20 @@ namespace LinkojaMicroservice.Services
             // In production, send OTP via SMS service (Twilio, AWS SNS, etc.)
             // For now, we'll just log it (in production, remove this)
             Console.WriteLine($"OTP for {phoneNumber}: {otpCode}");
+
+            // Also send via email as backup (if user has email with this phone)
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Phone == phoneNumber);
+                if (user != null && !string.IsNullOrEmpty(user.Email))
+                {
+                    await _emailService.SendOtpEmailAsync(user.Email, otpCode);
+                }
+            }
+            catch
+            {
+                // Don't fail if email fails
+            }
 
             return true;
         }

@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using LinkojaMicroservice.Data;
+using LinkojaMicroservice.Models;
 
 namespace LinkojaMicroservice
 {
@@ -27,11 +28,15 @@ namespace LinkojaMicroservice
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
+            // Configure SMTP settings
+            services.Configure<SmtpSettings>(Configuration.GetSection("SmtpSettings"));
+
             // Register services
             services.AddScoped<LinkojaMicroservice.Services.IAuthService, LinkojaMicroservice.Services.AuthService>();
             services.AddScoped<LinkojaMicroservice.Services.IBusinessService, LinkojaMicroservice.Services.BusinessService>();
             services.AddScoped<LinkojaMicroservice.Services.INotificationService, LinkojaMicroservice.Services.NotificationService>();
             services.AddScoped<LinkojaMicroservice.Services.IOtpService, LinkojaMicroservice.Services.OtpService>();
+            services.AddScoped<LinkojaMicroservice.Services.IEmailService, LinkojaMicroservice.Services.EmailService>();
 
             // JWT authentication
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

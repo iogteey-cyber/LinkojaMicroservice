@@ -18,11 +18,13 @@ namespace LinkojaMicroservice.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
-        public AuthService(ApplicationDbContext context, IConfiguration configuration)
+        public AuthService(ApplicationDbContext context, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public async Task<User> Register(string email, string password, string phone, string name)
@@ -52,6 +54,16 @@ namespace LinkojaMicroservice.Services
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+
+            // Send welcome email
+            try
+            {
+                await _emailService.SendWelcomeEmailAsync(user.Email, user.Name ?? "User");
+            }
+            catch
+            {
+                // Don't fail registration if email fails
+            }
 
             return user;
         }
@@ -125,6 +137,16 @@ namespace LinkojaMicroservice.Services
 
             _context.PasswordResetTokens.Add(resetToken);
             await _context.SaveChangesAsync();
+
+            // Send password reset email
+            try
+            {
+                await _emailService.SendPasswordResetEmailAsync(user.Email, token);
+            }
+            catch
+            {
+                // Don't fail if email fails
+            }
 
             return token;
         }

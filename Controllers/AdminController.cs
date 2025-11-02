@@ -17,11 +17,13 @@ namespace LinkojaMicroservice.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly Services.INotificationService _notificationService;
+        private readonly Services.IEmailService _emailService;
 
-        public AdminController(ApplicationDbContext context, Services.INotificationService notificationService)
+        public AdminController(ApplicationDbContext context, Services.INotificationService notificationService, Services.IEmailService emailService)
         {
             _context = context;
             _notificationService = notificationService;
+            _emailService = emailService;
         }
 
         [HttpGet("businesses/pending")]
@@ -77,6 +79,25 @@ namespace LinkojaMicroservice.Controllers
                     notificationMessage,
                     id
                 );
+
+                // Send email notification to business owner
+                try
+                {
+                    var owner = await _context.Users.FindAsync(business.OwnerId);
+                    if (owner != null && !string.IsNullOrEmpty(owner.Email))
+                    {
+                        await _emailService.SendBusinessApprovalEmailAsync(
+                            owner.Email,
+                            business.Name,
+                            request.Status,
+                            request.Reason
+                        );
+                    }
+                }
+                catch
+                {
+                    // Don't fail if email fails
+                }
 
                 return Ok(new { message = $"Business {request.Status} successfully", business });
             }
