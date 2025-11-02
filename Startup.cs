@@ -31,6 +31,7 @@ namespace LinkojaMicroservice
             services.AddScoped<LinkojaMicroservice.Services.IAuthService, LinkojaMicroservice.Services.AuthService>();
             services.AddScoped<LinkojaMicroservice.Services.IBusinessService, LinkojaMicroservice.Services.BusinessService>();
             services.AddScoped<LinkojaMicroservice.Services.INotificationService, LinkojaMicroservice.Services.NotificationService>();
+            services.AddScoped<LinkojaMicroservice.Services.IOtpService, LinkojaMicroservice.Services.OtpService>();
 
             // JWT authentication
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

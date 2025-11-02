@@ -154,5 +154,85 @@ namespace LinkojaMicroservice.Controllers
                 return StatusCode(500, new { message = "An error occurred while deleting business", error = ex.Message });
             }
         }
+
+        [HttpGet("reports/reviews")]
+        public async Task<IActionResult> GetReviewReports([FromQuery] string status = null)
+        {
+            try
+            {
+                var query = _context.ReviewReports
+                    .Include(r => r.Review)
+                        .ThenInclude(rev => rev.Business)
+                    .Include(r => r.ReportedBy)
+                    .AsQueryable();
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    query = query.Where(r => r.Status == status);
+                }
+
+                var reports = await query.OrderByDescending(r => r.CreatedAt).ToListAsync();
+
+                var reportDtos = reports.Select(r => new ReviewReportDto
+                {
+                    Id = r.Id,
+                    ReviewId = r.ReviewId,
+                    ReportedByUserId = r.ReportedByUserId,
+                    ReportedByName = r.ReportedBy?.Name,
+                    Reason = r.Reason,
+                    Description = r.Description,
+                    Status = r.Status,
+                    CreatedAt = r.CreatedAt
+                }).ToList();
+
+                return Ok(reportDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching reports", error = ex.Message });
+            }
+        }
+
+        [HttpPut("reports/reviews/{reportId}/resolve")]
+        public async Task<IActionResult> ResolveReviewReport(int reportId, [FromQuery] string action = "dismiss")
+        {
+            try
+            {
+                var report = await _context.ReviewReports
+                    .Include(r => r.Review)
+                    .FirstOrDefaultAsync(r => r.Id == reportId);
+
+                if (report == null)
+                {
+                    return NotFound(new { message = "Report not found" });
+                }
+
+                if (action == "delete-review")
+                {
+                    // Delete the reported review
+                    _context.BusinessReviews.Remove(report.Review);
+                    report.Status = "resolved";
+                    report.ResolvedAt = DateTime.UtcNow;
+                }
+                else if (action == "dismiss")
+                {
+                    // Dismiss the report
+                    report.Status = "dismissed";
+                    report.ResolvedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    return BadRequest(new { message = "Invalid action. Use 'delete-review' or 'dismiss'" });
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = $"Report {report.Status} successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while resolving the report", error = ex.Message });
+            }
+        }
     }
 }

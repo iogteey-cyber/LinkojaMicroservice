@@ -18,6 +18,8 @@ namespace LinkojaMicroservice.Data
         public DbSet<BusinessCategory> BusinessCategories { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<OtpVerification> OtpVerifications { get; set; }
+        public DbSet<ReviewReport> ReviewReports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -114,6 +116,27 @@ namespace LinkojaMicroservice.Data
                     .WithMany()
                     .HasForeignKey(e => e.RelatedBusinessId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Configure OtpVerification entity
+            modelBuilder.Entity<OtpVerification>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.PhoneNumber);
+            });
+
+            // Configure ReviewReport entity
+            modelBuilder.Entity<ReviewReport>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasOne(e => e.Review)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.ReportedBy)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReportedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

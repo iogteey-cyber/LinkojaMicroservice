@@ -1,7 +1,10 @@
 using LinkojaMicroservice.DTOs;
 using LinkojaMicroservice.Services;
+using LinkojaMicroservice.Data;
+using LinkojaMicroservice.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +18,12 @@ namespace LinkojaMicroservice.Controllers
     public class BusinessController : ControllerBase
     {
         private readonly IBusinessService _businessService;
+        private readonly ApplicationDbContext _context;
 
-        public BusinessController(IBusinessService businessService)
+        public BusinessController(IBusinessService businessService, ApplicationDbContext context)
         {
             _businessService = businessService;
+            _context = context;
         }
 
         private int GetUserId()
@@ -328,6 +333,52 @@ namespace LinkojaMicroservice.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while fetching insights", error = ex.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("reviews/{reviewId}/report")]
+        public async Task<IActionResult> ReportReview(int reviewId, [FromBody] ReportReviewRequest request)
+        {
+            try
+            {
+                var userId = GetUserId();
+                
+                // Check if review exists
+                var review = await _context.BusinessReviews.FindAsync(reviewId);
+                if (review == null)
+                {
+                    return NotFound(new { message = "Review not found" });
+                }
+
+                // Check if user has already reported this review
+                var existingReport = await _context.ReviewReports
+                    .FirstOrDefaultAsync(r => r.ReviewId == reviewId && r.ReportedByUserId == userId);
+
+                if (existingReport != null)
+                {
+                    return BadRequest(new { message = "You have already reported this review" });
+                }
+
+                // Create report
+                var report = new ReviewReport
+                {
+                    ReviewId = reviewId,
+                    ReportedByUserId = userId,
+                    Reason = request.Reason,
+                    Description = request.Description,
+                    Status = "pending",
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.ReviewReports.Add(report);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Review reported successfully", reportId = report.Id });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while reporting the review", error = ex.Message });
             }
         }
 

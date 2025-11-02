@@ -65,6 +65,8 @@ namespace LinkojaMicroservice.DTOs
         public int Rating { get; set; }
         
         public string Comment { get; set; }
+        
+        public string PhotoUrl { get; set; } // Optional photo with review
     }
 
     public class CreatePostRequest

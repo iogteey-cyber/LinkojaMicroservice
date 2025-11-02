@@ -19,6 +19,8 @@ namespace LinkojaMicroservice.Models
         
         public string Comment { get; set; }
         
+        public string PhotoUrl { get; set; } // Photo uploaded with review
+        
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

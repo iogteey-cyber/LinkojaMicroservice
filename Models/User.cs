@@ -12,6 +12,8 @@ namespace LinkojaMicroservice.Models
         
         public string Phone { get; set; }
         
+        public bool IsPhoneVerified { get; set; } = false;
+        
         [Required]
         public string PasswordHash { get; set; }
         

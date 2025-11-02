@@ -173,6 +173,7 @@ namespace LinkojaMicroservice.Services
                 UserId = userId,
                 Rating = request.Rating,
                 Comment = request.Comment,
+                PhotoUrl = request.PhotoUrl,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
