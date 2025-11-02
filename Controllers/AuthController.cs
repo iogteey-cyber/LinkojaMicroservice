@@ -28,7 +28,7 @@ namespace LinkojaMicroservice.Controllers
             _logger.LogInformation("User registration attempt for email: {Email}", request.Email);
             try
             {
-                var user = await _authService.Register(request.Email, request.Password, request.Phone, request.Name);
+                var user = await _authService.Register(request.Email, request.Password, request.Phone, request.Name,request.SocialId);
                 var token = _authService.GenerateJwtToken(user);
 
                 var response = new AuthResponse

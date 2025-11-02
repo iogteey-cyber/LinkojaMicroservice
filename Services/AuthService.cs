@@ -27,7 +27,7 @@ namespace LinkojaMicroservice.Services
             _emailService = emailService;
         }
 
-        public async Task<User> Register(string email, string password, string phone, string name)
+        public async Task<User> Register(string email, string password, string phone, string name, string socialId)
         {
             // Check if user already exists
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -49,7 +49,8 @@ namespace LinkojaMicroservice.Services
                 Role = "user",
                 AuthProvider = "local",
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                SocialId = socialId
             };
 
             _context.Users.Add(user);
