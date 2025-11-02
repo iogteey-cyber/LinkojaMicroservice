@@ -32,11 +32,27 @@ namespace LinkojaMicroservice.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllBusinesses([FromQuery] string category = null, [FromQuery] string status = null)
+        public async Task<IActionResult> GetAllBusinesses(
+            [FromQuery] string category = null, 
+            [FromQuery] string status = null,
+            [FromQuery] double? latitude = null,
+            [FromQuery] double? longitude = null,
+            [FromQuery] double? radiusKm = null)
         {
             try
             {
                 var businesses = await _businessService.GetAllBusinesses(category, status);
+                
+                // Filter by location if coordinates provided
+                if (latitude.HasValue && longitude.HasValue && radiusKm.HasValue)
+                {
+                    businesses = businesses.Where(b => 
+                        b.Latitude.HasValue && 
+                        b.Longitude.HasValue &&
+                        CalculateDistance(latitude.Value, longitude.Value, b.Latitude.Value, b.Longitude.Value) <= radiusKm.Value
+                    ).ToList();
+                }
+                
                 var businessDtos = businesses.Select(b => new BusinessDto
                 {
                     Id = b.Id,
@@ -277,6 +293,64 @@ namespace LinkojaMicroservice.Controllers
             {
                 return StatusCode(500, new { message = "An error occurred while creating the post", error = ex.Message });
             }
+        }
+
+        [Authorize]
+        [HttpGet("{id}/insights")]
+        public async Task<IActionResult> GetBusinessInsights(int id)
+        {
+            try
+            {
+                var userId = GetUserId();
+                var business = await _businessService.GetBusinessById(id);
+
+                // Check if user owns this business
+                if (business.OwnerId != userId)
+                {
+                    return Forbid();
+                }
+
+                var insights = new BusinessInsightsDto
+                {
+                    ProfileViews = 0, // To be implemented with view tracking
+                    FollowerCount = business.Followers?.Count ?? 0,
+                    ReviewCount = business.Reviews?.Count ?? 0,
+                    AverageRating = business.Reviews?.Any() == true ? business.Reviews.Average(r => r.Rating) : 0,
+                    PostCount = business.Posts?.Count ?? 0
+                };
+
+                return Ok(insights);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching insights", error = ex.Message });
+            }
+        }
+
+        // Helper method to calculate distance between two points using Haversine formula
+        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double earthRadiusKm = 6371.0;
+
+            var dLat = DegreesToRadians(lat2 - lat1);
+            var dLon = DegreesToRadians(lon2 - lon1);
+
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(DegreesToRadians(lat1)) * Math.Cos(DegreesToRadians(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+            return earthRadiusKm * c;
+        }
+
+        private double DegreesToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180.0;
         }
     }
 }

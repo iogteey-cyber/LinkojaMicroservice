@@ -16,6 +16,7 @@ namespace LinkojaMicroservice.Data
         public DbSet<BusinessFollower> BusinessFollowers { get; set; }
         public DbSet<BusinessPost> BusinessPosts { get; set; }
         public DbSet<BusinessCategory> BusinessCategories { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -87,6 +88,17 @@ namespace LinkojaMicroservice.Data
                     .WithMany(b => b.BusinessCategories)
                     .HasForeignKey(e => e.BusinessId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure PasswordResetToken entity
+            modelBuilder.Entity<PasswordResetToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(e => e.Token).IsUnique();
             });
         }
     }
