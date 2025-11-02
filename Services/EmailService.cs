@@ -1,4 +1,5 @@
 using LinkojaMicroservice.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Net;
@@ -10,16 +11,20 @@ namespace LinkojaMicroservice.Services
     public class EmailService : IEmailService
     {
         private readonly SmtpSettings _smtpSettings;
+        private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IOptions<SmtpSettings> smtpSettings)
+        public EmailService(IOptions<SmtpSettings> smtpSettings, ILogger<EmailService> logger)
         {
             _smtpSettings = smtpSettings.Value;
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true)
         {
             try
             {
+                _logger.LogInformation("Attempting to send email to {ToEmail} with subject: {Subject}", toEmail, subject);
+                
                 using (var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port))
                 {
                     client.EnableSsl = _smtpSettings.EnableSsl;
@@ -37,12 +42,12 @@ namespace LinkojaMicroservice.Services
                     mailMessage.To.Add(toEmail);
 
                     await client.SendMailAsync(mailMessage);
+                    _logger.LogInformation("Email successfully sent to {ToEmail}", toEmail);
                 }
             }
             catch (Exception ex)
             {
-                // Log the error (in production, use proper logging)
-                Console.WriteLine($"Failed to send email to {toEmail}: {ex.Message}");
+                _logger.LogError(ex, "Failed to send email to {ToEmail}: {ErrorMessage}", toEmail, ex.Message);
                 // Don't throw to prevent blocking the main operation
             }
         }

@@ -1,6 +1,7 @@
 using LinkojaMicroservice.Data;
 using LinkojaMicroservice.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,15 +12,19 @@ namespace LinkojaMicroservice.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly ILogger<OtpService> _logger;
 
-        public OtpService(ApplicationDbContext context, IEmailService emailService)
+        public OtpService(ApplicationDbContext context, IEmailService emailService, ILogger<OtpService> logger)
         {
             _context = context;
             _emailService = emailService;
+            _logger = logger;
         }
 
         public async Task<bool> SendOtp(string phoneNumber)
         {
+            _logger.LogInformation("Sending OTP to phone number: {PhoneNumber}", phoneNumber);
+            
             // Generate a 6-digit OTP
             var random = new Random();
             var otpCode = random.Next(100000, 999999).ToString();
@@ -58,7 +63,7 @@ namespace LinkojaMicroservice.Services
 
             // In production, send OTP via SMS service (Twilio, AWS SNS, etc.)
             // For now, we'll just log it (in production, remove this)
-            Console.WriteLine($"OTP for {phoneNumber}: {otpCode}");
+            _logger.LogWarning("OTP generated for {PhoneNumber}: {OtpCode} - SMS integration pending", phoneNumber, otpCode);
 
             // Also send via email as backup (if user has email with this phone)
             try
@@ -67,11 +72,12 @@ namespace LinkojaMicroservice.Services
                 if (user != null && !string.IsNullOrEmpty(user.Email))
                 {
                     await _emailService.SendOtpEmailAsync(user.Email, otpCode);
+                    _logger.LogInformation("OTP sent via email to user with phone: {PhoneNumber}", phoneNumber);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Don't fail if email fails
+                _logger.LogError(ex, "Failed to send OTP email for phone: {PhoneNumber}", phoneNumber);
             }
 
             return true;
