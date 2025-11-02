@@ -148,5 +148,41 @@ namespace LinkojaMicroservice.Controllers
                 return StatusCode(500, new { message = "An error occurred", error = ex.Message });
             }
         }
+
+        [HttpPost("social-login")]
+        public async Task<IActionResult> SocialLogin([FromBody] SocialLoginRequest request)
+        {
+            try
+            {
+                var user = await _authService.SocialLogin(
+                    request.Provider, 
+                    request.AccessToken, 
+                    request.Email, 
+                    request.Name, 
+                    request.PhotoUrl
+                );
+                
+                var token = _authService.GenerateJwtToken(user);
+
+                var response = new AuthResponse
+                {
+                    Token = token,
+                    User = new UserDto
+                    {
+                        Id = user.Id,
+                        Email = user.Email,
+                        Phone = user.Phone,
+                        Name = user.Name,
+                        Role = user.Role
+                    }
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred during social login", error = ex.Message });
+            }
+        }
     }
 }

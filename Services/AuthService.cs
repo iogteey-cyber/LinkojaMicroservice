@@ -45,6 +45,7 @@ namespace LinkojaMicroservice.Services
                 Phone = phone,
                 Name = name,
                 Role = "user",
+                AuthProvider = "local",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -175,6 +176,46 @@ namespace LinkojaMicroservice.Services
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<User> SocialLogin(string provider, string accessToken, string email, string name, string photoUrl)
+        {
+            // In production, validate the accessToken with the provider's API
+            // For Google: https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={token}
+            // For Facebook: https://graph.facebook.com/me?access_token={token}
+            // For Apple: Validate JWT token
+
+            // Check if user exists with this social provider
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user != null)
+            {
+                // User exists, update if needed
+                if (user.AuthProvider != provider)
+                {
+                    user.AuthProvider = provider;
+                    user.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                }
+                return user;
+            }
+
+            // Create new user with social login
+            var newUser = new User
+            {
+                Email = email,
+                Name = name,
+                Role = "user",
+                AuthProvider = provider,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()), // Random password for social login
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
+            return newUser;
         }
     }
 }

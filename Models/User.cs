@@ -21,6 +21,10 @@ namespace LinkojaMicroservice.Models
         
         public string Role { get; set; } = "user"; // user, business_owner, admin
         
+        public string AuthProvider { get; set; } // "local", "google", "facebook", "apple"
+        
+        public string SocialId { get; set; } // ID from social provider
+        
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
