@@ -24,7 +24,11 @@ namespace LinkojaMicroservice.Controllers
         private int GetUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return int.Parse(userIdClaim ?? "0");
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                throw new UnauthorizedAccessException("User is not authenticated");
+            }
+            return userId;
         }
 
         [HttpGet]

@@ -150,6 +150,21 @@ namespace LinkojaMicroservice.Services
                 throw new KeyNotFoundException("Business not found");
             }
 
+            // Prevent business owners from reviewing their own businesses
+            if (business.OwnerId == userId)
+            {
+                throw new InvalidOperationException("You cannot review your own business");
+            }
+
+            // Check if user has already reviewed this business
+            var existingReview = await _context.BusinessReviews
+                .FirstOrDefaultAsync(r => r.BusinessId == businessId && r.UserId == userId);
+
+            if (existingReview != null)
+            {
+                throw new InvalidOperationException("You have already reviewed this business");
+            }
+
             var review = new BusinessReview
             {
                 BusinessId = businessId,
