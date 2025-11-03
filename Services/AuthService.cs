@@ -19,12 +19,14 @@ namespace LinkojaMicroservice.Services
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly IGoogleOAuthService _googleOAuthService;
 
-        public AuthService(ApplicationDbContext context, IConfiguration configuration, IEmailService emailService)
+        public AuthService(ApplicationDbContext context, IConfiguration configuration, IEmailService emailService, IGoogleOAuthService googleOAuthService)
         {
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
+            _googleOAuthService = googleOAuthService;
         }
 
         public async Task<User> Register(string email, string password, string phone, string name, string socialId)
@@ -203,42 +205,114 @@ namespace LinkojaMicroservice.Services
 
         public async Task<User> SocialLogin(string provider, string accessToken, string email, string name, string photoUrl)
         {
-            // In production, validate the accessToken with the provider's API
-            // For Google: https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={token}
-            // For Facebook: https://graph.facebook.com/me?access_token={token}
-            // For Apple: Validate JWT token
-
-            // Check if user exists with this social provider
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-
-            if (user != null)
+            // Validate the token with the provider's API
+            if (provider.ToLower() == "google")
             {
-                // User exists, update if needed
-                if (user.AuthProvider != provider)
+                // Validate Google ID token
+                var googleUserInfo = await _googleOAuthService.ValidateTokenAsync(accessToken);
+                
+                // Use validated information from Google
+                email = googleUserInfo.Email;
+                name = googleUserInfo.Name;
+                photoUrl = googleUserInfo.Picture;
+                
+                // Check if user exists with this social provider
+                var existingUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email == email || u.SocialId == googleUserInfo.GoogleId);
+
+                if (existingUser != null)
                 {
-                    user.AuthProvider = provider;
-                    user.UpdatedAt = DateTime.UtcNow;
-                    await _context.SaveChangesAsync();
+                    // User exists, update if needed
+                    if (existingUser.AuthProvider != provider || existingUser.SocialId != googleUserInfo.GoogleId)
+                    {
+                        existingUser.AuthProvider = provider;
+                        existingUser.SocialId = googleUserInfo.GoogleId;
+                        existingUser.Name = name;
+                        existingUser.UpdatedAt = DateTime.UtcNow;
+                        await _context.SaveChangesAsync();
+                    }
+                    return existingUser;
                 }
-                return user;
+
+                // Create new user with Google social login
+                var newUser = new User
+                {
+                    Email = email,
+                    Name = name,
+                    Role = "user",
+                    AuthProvider = provider,
+                    SocialId = googleUserInfo.GoogleId,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()), // Random password for social login
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                _context.Users.Add(newUser);
+                await _context.SaveChangesAsync();
+
+                // Send welcome email
+                try
+                {
+                    await _emailService.SendWelcomeEmailAsync(newUser.Email, newUser.Name ?? "User");
+                }
+                catch
+                {
+                    // Don't fail registration if email fails
+                }
+
+                return newUser;
             }
-
-            // Create new user with social login
-            var newUser = new User
+            else if (provider.ToLower() == "facebook" || provider.ToLower() == "apple")
             {
-                Email = email,
-                Name = name,
-                Role = "user",
-                AuthProvider = provider,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()), // Random password for social login
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+                // For Facebook and Apple, implement similar validation
+                // For now, basic implementation without full validation
+                // In production, validate Facebook and Apple tokens properly
+                
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
-            _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
+                if (user != null)
+                {
+                    // User exists, update if needed
+                    if (user.AuthProvider != provider)
+                    {
+                        user.AuthProvider = provider;
+                        user.UpdatedAt = DateTime.UtcNow;
+                        await _context.SaveChangesAsync();
+                    }
+                    return user;
+                }
 
-            return newUser;
+                // Create new user with social login
+                var newUser = new User
+                {
+                    Email = email,
+                    Name = name,
+                    Role = "user",
+                    AuthProvider = provider,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()), // Random password for social login
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                _context.Users.Add(newUser);
+                await _context.SaveChangesAsync();
+
+                // Send welcome email
+                try
+                {
+                    await _emailService.SendWelcomeEmailAsync(newUser.Email, newUser.Name ?? "User");
+                }
+                catch
+                {
+                    // Don't fail registration if email fails
+                }
+
+                return newUser;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unsupported provider: {provider}");
+            }
         }
     }
 }

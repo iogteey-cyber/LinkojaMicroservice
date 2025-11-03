@@ -30,6 +30,16 @@ namespace LinkojaMicroservice
 
             // Configure SMTP settings
             services.Configure<SmtpSettings>(Configuration.GetSection("SmtpSettings"));
+            
+            // Configure Termii SMS settings
+            services.Configure<TermiiSettings>(Configuration.GetSection("TermiiSettings"));
+            
+            // Configure Google OAuth settings
+            services.Configure<GoogleOAuthSettings>(Configuration.GetSection("GoogleOAuthSettings"));
+
+            // Register HttpClient for external API calls
+            services.AddHttpClient<LinkojaMicroservice.Services.TermiiSmsService>();
+            services.AddHttpClient<LinkojaMicroservice.Services.GoogleOAuthService>();
 
             // Register services
             services.AddScoped<LinkojaMicroservice.Services.IAuthService, LinkojaMicroservice.Services.AuthService>();
@@ -37,6 +47,8 @@ namespace LinkojaMicroservice
             services.AddScoped<LinkojaMicroservice.Services.INotificationService, LinkojaMicroservice.Services.NotificationService>();
             services.AddScoped<LinkojaMicroservice.Services.IOtpService, LinkojaMicroservice.Services.OtpService>();
             services.AddScoped<LinkojaMicroservice.Services.IEmailService, LinkojaMicroservice.Services.EmailService>();
+            services.AddScoped<LinkojaMicroservice.Services.ISmsService, LinkojaMicroservice.Services.TermiiSmsService>();
+            services.AddScoped<LinkojaMicroservice.Services.IGoogleOAuthService, LinkojaMicroservice.Services.GoogleOAuthService>();
             services.AddScoped<DatabaseInitializer>();
 
             // JWT authentication

@@ -12,12 +12,14 @@ namespace LinkojaMicroservice.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly ISmsService _smsService;
         private readonly ILogger<OtpService> _logger;
 
-        public OtpService(ApplicationDbContext context, IEmailService emailService, ILogger<OtpService> logger)
+        public OtpService(ApplicationDbContext context, IEmailService emailService, ISmsService smsService, ILogger<OtpService> logger)
         {
             _context = context;
             _emailService = emailService;
+            _smsService = smsService;
             _logger = logger;
         }
 
@@ -61,9 +63,25 @@ namespace LinkojaMicroservice.Services
 
             await _context.SaveChangesAsync();
 
-            // In production, send OTP via SMS service (Twilio, AWS SNS, etc.)
-            // For now, we'll just log it (in production, remove this)
-            _logger.LogWarning("OTP generated for {PhoneNumber}: {OtpCode} - SMS integration pending", phoneNumber, otpCode);
+            // Send OTP via SMS using Termii
+            try
+            {
+                var smsMessage = $"Your Linkoja verification code is: {otpCode}. This code expires in 10 minutes.";
+                var smsSent = await _smsService.SendSmsAsync(phoneNumber, smsMessage);
+                
+                if (smsSent)
+                {
+                    _logger.LogInformation("OTP sent successfully via SMS to {PhoneNumber}", phoneNumber);
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to send OTP via SMS to {PhoneNumber}, will attempt email backup", phoneNumber);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send OTP via SMS to {PhoneNumber}", phoneNumber);
+            }
 
             // Also send via email as backup (if user has email with this phone)
             try
@@ -72,12 +90,12 @@ namespace LinkojaMicroservice.Services
                 if (user != null && !string.IsNullOrEmpty(user.Email))
                 {
                     await _emailService.SendOtpEmailAsync(user.Email, otpCode);
-                    _logger.LogInformation("OTP sent via email to user with phone: {PhoneNumber}", phoneNumber);
+                    _logger.LogInformation("OTP sent via email backup to user with phone: {PhoneNumber}", phoneNumber);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send OTP email for phone: {PhoneNumber}", phoneNumber);
+                _logger.LogError(ex, "Failed to send OTP email backup for phone: {PhoneNumber}", phoneNumber);
             }
 
             return true;
