@@ -1,0 +1,49 @@
+name: linkoja-microservice
+region: nyc
+
+services:
+  - name: api
+    github:
+      repo: iogteey-cyber/LinkojaMicroservice
+      branch: main
+      deploy_on_push: true
+    
+    # Build configuration
+    build_command: dotnet publish -c Release -o /app/publish
+    
+    # Run configuration
+    run_command: dotnet /app/publish/LinkojaMicroservice.dll
+    
+    # Health check
+    health_check:
+      http_path: /swagger/index.html
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    
+    # Environment variables
+    envs:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:8080
+    
+    # HTTP port
+    http_port: 8080
+    
+    # Instance configuration
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    
+    # Routes
+    routes:
+      - path: /
+
+databases:
+  - name: linkoja-db
+    engine: PG
+    version: "14"
+    production: false
+    cluster_name: linkoja-db-cluster

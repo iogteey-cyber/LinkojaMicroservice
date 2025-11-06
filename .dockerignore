@@ -1,0 +1,39 @@
+# .NET build artifacts
+bin/
+obj/
+out/
+
+# Logs
+Logs/
+*.log
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+FlutterApp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+*.Tests/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
