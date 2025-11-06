@@ -12,12 +12,18 @@ namespace LinkojaMicroservice.Models
         
         public string Phone { get; set; }
         
+        public bool IsPhoneVerified { get; set; } = false;
+        
         [Required]
         public string PasswordHash { get; set; }
         
         public string Name { get; set; }
         
         public string Role { get; set; } = "user"; // user, business_owner, admin
+        
+        public string AuthProvider { get; set; } // "local", "google", "facebook", "apple"
+        
+        public string SocialId { get; set; } // ID from social provider
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
