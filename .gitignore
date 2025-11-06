@@ -93,3 +93,11 @@ ScaffoldingReadMe.txt
 
 # Windows
 Thumbs.db
+
+# Local configuration files with secrets (never commit these)
+appsettings.Local.json
+appsettings.Production.json
+**/appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+!appsettings.*.json.example

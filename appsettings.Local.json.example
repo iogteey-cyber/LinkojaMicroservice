@@ -1,0 +1,31 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=LinkojaDb;Username=postgres;Password=sqluser10$"
+  },
+  "Jwt": {
+    "Key": "455665544weerQQQe5566yyhhggyy@@##$$3ffgghhhhhjjjj!",
+    "Issuer": "LinkojaMicroservice",
+    "Audience": "LinkojaApp",
+    "ExpiryMinutes": 60
+  },
+  "SmtpSettings": {
+    "Host": "smtp.office365.com",
+    "Port": 587,
+    "EnableSsl": true,
+    "FromEmail": "finpay@fintraksoftware.com",
+    "FromName": "Linkoja Notifications",
+    "Username": "finpay@fintraksoftware.com",
+    "Password": "Fintrak@1234"
+  },
+  "TermiiSettings": {
+    "ApiKey": "TLjDEAmMsYbcAnTDRBXCSPTdikEEGSxMvFYLgWnPutRFhArorpGCtHiCpuPRHd",
+    "SenderId": "Linkoja",
+    "ApiUrl": "https://api.ng.termii.com/api/sms/send",
+    "Channel": "generic"
+  },
+  "GoogleOAuthSettings": {
+    "ClientId": "1027186401789-gmlrvq5qq51ffga0nhepf3173ldc20oq.apps.googleusercontent.com",
+    "ClientSecret": "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",
+    "TokenValidationUrl": "https://oauth2.googleapis.com/tokeninfo"
+  }
+}
