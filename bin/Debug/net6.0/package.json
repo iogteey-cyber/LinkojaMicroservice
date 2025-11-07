@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "name": "linkoja-microservice",
+  "description": "Linkoja Platform - Local Business Connection Microservice",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iogteey-cyber/LinkojaMicroservice"
+  },
+  "scripts": {
+    "start": "dotnet run",
+    "build": "dotnet build",
+    "publish": "dotnet publish -c Release -o ./publish",
+    "restore": "dotnet restore",
+    "clean": "dotnet clean"
+  },
+  "engines": {
+    "dotnet": "6.0"
+  },
+  "keywords": [
+    "dotnet",
+    "aspnet",
+    "microservice",
+    "business-directory",
+    "api"
+  ],
+  "author": "Johnson Olawumi",
+  "license": "MIT"
+}

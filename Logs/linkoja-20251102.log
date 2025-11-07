@@ -1,0 +1,86 @@
+[2025-11-02 22:45:01.919 +01:00 INF] Starting Linkoja Microservice {}
+[2025-11-02 22:48:40.868 +01:00 INF] Starting Linkoja Microservice {}
+[2025-11-02 22:49:14.309 +01:00 INF] Sending OTP to phone number: 07065838412 {"SourceContext":"LinkojaMicroservice.Services.OtpService","ActionId":"2a07103d-536d-48cc-be73-89e4fd2e54d4","ActionName":"LinkojaMicroservice.Controllers.VerificationController.SendOtp (LinkojaMicroservice)","RequestId":"0HNGQB6BFL7BQ:0000000B","RequestPath":"/api/Verification/send-otp","ConnectionId":"0HNGQB6BFL7BQ"}
+[2025-11-02 22:49:23.371 +01:00 ERR] Failed executing DbCommand (688ms) [Parameters=[@__phoneNumber_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT o."Id", o."AttemptCount", o."CreatedAt", o."ExpiresAt", o."IsVerified", o."OtpCode", o."PhoneNumber"
+FROM "OtpVerifications" AS o
+WHERE (o."PhoneNumber" = @__phoneNumber_0) AND NOT (o."IsVerified")
+ORDER BY o."CreatedAt" DESC
+LIMIT 1 {"EventId":{"Id":20102,"Name":"Microsoft.EntityFrameworkCore.Database.Command.CommandError"},"SourceContext":"Microsoft.EntityFrameworkCore.Database.Command","ActionId":"2a07103d-536d-48cc-be73-89e4fd2e54d4","ActionName":"LinkojaMicroservice.Controllers.VerificationController.SendOtp (LinkojaMicroservice)","RequestId":"0HNGQB6BFL7BQ:0000000B","RequestPath":"/api/Verification/send-otp","ConnectionId":"0HNGQB6BFL7BQ"}
+[2025-11-02 22:49:23.477 +01:00 ERR] An exception occurred while iterating over the results of a query for context type 'LinkojaMicroservice.Data.ApplicationDbContext'.
+Npgsql.PostgresException (0x80004005): 42P01: relation "OtpVerifications" does not exist
+
+POSITION: 115
+   at Npgsql.Internal.NpgsqlConnector.<ReadMessage>g__ReadMessageLong|223_0(NpgsqlConnector connector, Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(CommandBehavior behavior, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(CommandBehavior behavior, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "OtpVerifications" does not exist
+    Position: 115
+    File: parse_relation.c
+    Line: 1469
+    Routine: parserOpenTable {"EventId":{"Id":10100,"Name":"Microsoft.EntityFrameworkCore.Query.QueryIterationFailed"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"2a07103d-536d-48cc-be73-89e4fd2e54d4","ActionName":"LinkojaMicroservice.Controllers.VerificationController.SendOtp (LinkojaMicroservice)","RequestId":"0HNGQB6BFL7BQ:0000000B","RequestPath":"/api/Verification/send-otp","ConnectionId":"0HNGQB6BFL7BQ"}
+Npgsql.PostgresException (0x80004005): 42P01: relation "OtpVerifications" does not exist
+
+POSITION: 115
+   at Npgsql.Internal.NpgsqlConnector.<ReadMessage>g__ReadMessageLong|223_0(NpgsqlConnector connector, Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(CommandBehavior behavior, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(CommandBehavior behavior, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "OtpVerifications" does not exist
+    Position: 115
+    File: parse_relation.c
+    Line: 1469
+    Routine: parserOpenTable
+[2025-11-02 23:09:44.670 +01:00 INF] Starting Linkoja Microservice {}
+[2025-11-02 23:09:45.673 +01:00 INF] Starting database initialization... {"SourceContext":"LinkojaMicroservice.Data.DatabaseInitializer"}
+[2025-11-02 23:09:46.403 +01:00 INF] Database initialization completed successfully. {"SourceContext":"LinkojaMicroservice.Data.DatabaseInitializer"}
+[2025-11-02 23:10:24.479 +01:00 INF] Sending OTP to phone number: 07065838412 {"SourceContext":"LinkojaMicroservice.Services.OtpService","ActionId":"a3568abb-9b27-4565-b1e5-21f014ea9b50","ActionName":"LinkojaMicroservice.Controllers.VerificationController.SendOtp (LinkojaMicroservice)","RequestId":"0HNGQBI4EVSTS:0000000B","RequestPath":"/api/Verification/send-otp","ConnectionId":"0HNGQBI4EVSTS"}
+[2025-11-02 23:10:43.037 +01:00 WRN] OTP generated for 07065838412: 884737 - SMS integration pending {"SourceContext":"LinkojaMicroservice.Services.OtpService","ActionId":"a3568abb-9b27-4565-b1e5-21f014ea9b50","ActionName":"LinkojaMicroservice.Controllers.VerificationController.SendOtp (LinkojaMicroservice)","RequestId":"0HNGQBI4EVSTS:0000000B","RequestPath":"/api/Verification/send-otp","ConnectionId":"0HNGQBI4EVSTS"}
+[2025-11-02 23:13:06.374 +01:00 INF] User registration attempt for email: nathyt4u@gmail.com {"SourceContext":"LinkojaMicroservice.Controllers.AuthController","ActionId":"e471cf04-4ef0-405c-8b76-bf98554b65cd","ActionName":"LinkojaMicroservice.Controllers.AuthController.Register (LinkojaMicroservice)","RequestId":"0HNGQBI4EVSTS:0000000F","RequestPath":"/api/Auth/register","ConnectionId":"0HNGQBI4EVSTS"}
+[2025-11-02 23:13:48.073 +01:00 INF] Attempting to send email to nathyt4u@gmail.com with subject: Welcome to Linkoja! {"SourceContext":"LinkojaMicroservice.Services.EmailService","ActionId":"e471cf04-4ef0-405c-8b76-bf98554b65cd","ActionName":"LinkojaMicroservice.Controllers.AuthController.Register (LinkojaMicroservice)","RequestId":"0HNGQBI4EVSTS:0000000F","RequestPath":"/api/Auth/register","ConnectionId":"0HNGQBI4EVSTS"}
+[2025-11-02 23:13:51.977 +01:00 INF] Email successfully sent to nathyt4u@gmail.com {"SourceContext":"LinkojaMicroservice.Services.EmailService","ActionId":"e471cf04-4ef0-405c-8b76-bf98554b65cd","ActionName":"LinkojaMicroservice.Controllers.AuthController.Register (LinkojaMicroservice)","RequestId":"0HNGQBI4EVSTS:0000000F","RequestPath":"/api/Auth/register","ConnectionId":"0HNGQBI4EVSTS"}
+[2025-11-02 23:14:09.677 +01:00 INF] User registered successfully: nathyt4u@gmail.com, UserId: 2 {"SourceContext":"LinkojaMicroservice.Controllers.AuthController","ActionId":"e471cf04-4ef0-405c-8b76-bf98554b65cd","ActionName":"LinkojaMicroservice.Controllers.AuthController.Register (LinkojaMicroservice)","RequestId":"0HNGQBI4EVSTS:0000000F","RequestPath":"/api/Auth/register","ConnectionId":"0HNGQBI4EVSTS"}
+[2025-11-02 23:17:14.985 +01:00 ERR] An exception occurred while iterating over the results of a query for context type 'LinkojaMicroservice.Data.ApplicationDbContext'.
+System.InvalidCastException: Column 'SocialId' is null.
+   at Npgsql.ThrowHelper.ThrowInvalidCastException_NoValue(FieldDescription field)
+   at Npgsql.NpgsqlDataReader.GetFieldValue[T](Int32 ordinal)
+   at lambda_method97(Closure , QueryContext , DbDataReader , ResultContext , SingleQueryResultCoordinator )
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync() {"EventId":{"Id":10100,"Name":"Microsoft.EntityFrameworkCore.Query.QueryIterationFailed"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"33348a4b-1e4d-4768-9132-a07425cf5106","ActionName":"LinkojaMicroservice.Controllers.AuthController.Login (LinkojaMicroservice)","RequestId":"0HNGQBI4EVSTS:00000011","RequestPath":"/api/Auth/login","ConnectionId":"0HNGQBI4EVSTS"}
+System.InvalidCastException: Column 'SocialId' is null.
+   at Npgsql.ThrowHelper.ThrowInvalidCastException_NoValue(FieldDescription field)
+   at Npgsql.NpgsqlDataReader.GetFieldValue[T](Int32 ordinal)
+   at lambda_method97(Closure , QueryContext , DbDataReader , ResultContext , SingleQueryResultCoordinator )
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+[2025-11-02 23:17:45.910 +01:00 ERR] An exception occurred while iterating over the results of a query for context type 'LinkojaMicroservice.Data.ApplicationDbContext'.
+System.InvalidCastException: Column 'SocialId' is null.
+   at Npgsql.ThrowHelper.ThrowInvalidCastException_NoValue(FieldDescription field)
+   at Npgsql.NpgsqlDataReader.GetFieldValue[T](Int32 ordinal)
+   at lambda_method97(Closure , QueryContext , DbDataReader , ResultContext , SingleQueryResultCoordinator )
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync() {"EventId":{"Id":10100,"Name":"Microsoft.EntityFrameworkCore.Query.QueryIterationFailed"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"33348a4b-1e4d-4768-9132-a07425cf5106","ActionName":"LinkojaMicroservice.Controllers.AuthController.Login (LinkojaMicroservice)","RequestId":"0HNGQBI4EVSTS:00000013","RequestPath":"/api/Auth/login","ConnectionId":"0HNGQBI4EVSTS"}
+System.InvalidCastException: Column 'SocialId' is null.
+   at Npgsql.ThrowHelper.ThrowInvalidCastException_NoValue(FieldDescription field)
+   at Npgsql.NpgsqlDataReader.GetFieldValue[T](Int32 ordinal)
+   at lambda_method97(Closure , QueryContext , DbDataReader , ResultContext , SingleQueryResultCoordinator )
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+[2025-11-02 23:22:37.223 +01:00 INF] Starting Linkoja Microservice {}
+[2025-11-02 23:22:38.142 +01:00 INF] Starting database initialization... {"SourceContext":"LinkojaMicroservice.Data.DatabaseInitializer"}
+[2025-11-02 23:22:38.705 +01:00 INF] Database initialization completed successfully. {"SourceContext":"LinkojaMicroservice.Data.DatabaseInitializer"}
