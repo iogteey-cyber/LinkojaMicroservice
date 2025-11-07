@@ -4,11 +4,15 @@ using LinkojaMicroservice;
 using Serilog;
 using System;
 using Microsoft.Extensions.Configuration;
+using LinkojaMicroservice.Utilities;
 
 public class Program
 {
     public static void Main(string[] args)
     {
+        // Map platform env vars into config-friendly env vars before configuration is read
+        EnvVarMapper.Map();
+
         // If DIGITALOCEAN (App Platform) provides DATABASE_URL (postgres://user:pass@host:port/db)
         // convert it to an Npgsql-compatible connection string and set it as
         // the ConnectionStrings__DefaultConnection environment variable so EF Core can use
