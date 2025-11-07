@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\LinkojaMicroservice.csproj": {}
+    "C:\\Users\\Tayo.olawunmi\\Source\\Repos\\LinkojaMicroservice\\LinkojaMicroservice.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\LinkojaMicroservice.csproj": {
+    "C:\\Users\\Tayo.olawunmi\\Source\\Repos\\LinkojaMicroservice\\LinkojaMicroservice.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\LinkojaMicroservice.csproj",
+        "projectUniqueName": "C:\\Users\\Tayo.olawunmi\\Source\\Repos\\LinkojaMicroservice\\LinkojaMicroservice.csproj",
         "projectName": "LinkojaMicroservice",
-        "projectPath": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\LinkojaMicroservice.csproj",
+        "projectPath": "C:\\Users\\Tayo.olawunmi\\Source\\Repos\\LinkojaMicroservice\\LinkojaMicroservice.csproj",
         "packagesPath": "C:\\Users\\Tayo.olawunmi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\obj\\",
+        "outputPath": "C:\\Users\\Tayo.olawunmi\\Source\\Repos\\LinkojaMicroservice\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
