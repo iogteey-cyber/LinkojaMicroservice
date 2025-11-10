@@ -79,11 +79,13 @@ namespace LinkojaMicroservice.Controllers
                     UpdatedAt = b.UpdatedAt
                 }).ToList();
 
-                return Ok(businessDtos);
+                var response = ResponseStatus<List<BusinessDto>>.Create<BasicResponse<List<BusinessDto>>>("00", "Businesses fetched successfully", businessDtos, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching businesses", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching businesses", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -114,15 +116,18 @@ namespace LinkojaMicroservice.Controllers
                     UpdatedAt = business.UpdatedAt
                 };
 
-                return Ok(businessDto);
+                var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business fetched successfully", businessDto, true);
+                return Ok(response);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching the business", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -134,11 +139,13 @@ namespace LinkojaMicroservice.Controllers
             {
                 var userId = GetUserId();
                 var business = await _businessService.CreateBusiness(userId, request);
-                return CreatedAtAction(nameof(GetBusinessById), new { id = business.Id }, business);
+                var response = ResponseStatus<Business>.Create<BasicResponse<Business>>("00", "Business created successfully", business, true);
+                return CreatedAtAction(nameof(GetBusinessById), new { id = business.Id }, response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while creating the business", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while creating the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -150,19 +157,22 @@ namespace LinkojaMicroservice.Controllers
             {
                 var userId = GetUserId();
                 var business = await _businessService.UpdateBusiness(id, userId, request);
-                return Ok(business);
+                var response = ResponseStatus<Business>.Create<BasicResponse<Business>>("00", "Business updated successfully", business, true);
+                return Ok(response);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Forbid();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while updating the business", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while updating the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -174,19 +184,22 @@ namespace LinkojaMicroservice.Controllers
             {
                 var userId = GetUserId();
                 await _businessService.DeleteBusiness(id, userId);
-                return NoContent();
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Business deleted successfully", null, true);
+                return Ok(response);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Forbid();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while deleting the business", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while deleting the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -198,11 +211,13 @@ namespace LinkojaMicroservice.Controllers
             {
                 var userId = GetUserId();
                 var businesses = await _businessService.GetUserBusinesses(userId);
-                return Ok(businesses);
+                var response = ResponseStatus<List<Business>>.Create<BasicResponse<List<Business>>>("00", "Businesses fetched successfully", businesses, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching your businesses", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching your businesses", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -214,15 +229,18 @@ namespace LinkojaMicroservice.Controllers
             {
                 var userId = GetUserId();
                 var review = await _businessService.AddReview(id, userId, request);
-                return CreatedAtAction(nameof(GetBusinessById), new { id = id }, review);
+                var response = ResponseStatus<BusinessReview>.Create<BasicResponse<BusinessReview>>("00", "Review added successfully", review, true);
+                return CreatedAtAction(nameof(GetBusinessById), new { id = id }, response);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while adding the review", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while adding the review", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -236,20 +254,24 @@ namespace LinkojaMicroservice.Controllers
                 var result = await _businessService.FollowBusiness(id, userId);
                 if (result)
                 {
-                    return Ok(new { message = "Business followed successfully" });
+                    var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Business followed successfully", null, true);
+                    return Ok(response);
                 }
                 else
                 {
-                    return BadRequest(new { message = "Already following this business" });
+                    var response = ResponseStatus<object>.Create<BasicResponse<object>>("01", "Already following this business", null, false);
+                    return BadRequest(response);
                 }
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while following the business", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while following the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -263,16 +285,19 @@ namespace LinkojaMicroservice.Controllers
                 var result = await _businessService.UnfollowBusiness(id, userId);
                 if (result)
                 {
-                    return Ok(new { message = "Business unfollowed successfully" });
+                    var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Business unfollowed successfully", null, true);
+                    return Ok(response);
                 }
                 else
                 {
-                    return BadRequest(new { message = "Not following this business" });
+                    var response = ResponseStatus<object>.Create<BasicResponse<object>>("01", "Not following this business", null, false);
+                    return BadRequest(response);
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while unfollowing the business", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while unfollowing the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -284,19 +309,22 @@ namespace LinkojaMicroservice.Controllers
             {
                 var userId = GetUserId();
                 var post = await _businessService.CreatePost(id, userId, request);
-                return CreatedAtAction(nameof(GetBusinessById), new { id = id }, post);
+                var response = ResponseStatus<BusinessPost>.Create<BasicResponse<BusinessPost>>("00", "Post created successfully", post, true);
+                return CreatedAtAction(nameof(GetBusinessById), new { id = id }, response);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Forbid();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while creating the post", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while creating the post", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -324,15 +352,18 @@ namespace LinkojaMicroservice.Controllers
                     PostCount = business.Posts?.Count ?? 0
                 };
 
-                return Ok(insights);
+                var response = ResponseStatus<BusinessInsightsDto>.Create<BasicResponse<BusinessInsightsDto>>("00", "Insights fetched successfully", insights, true);
+                return Ok(response);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching insights", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching insights", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -348,7 +379,8 @@ namespace LinkojaMicroservice.Controllers
                 var review = await _context.BusinessReviews.FindAsync(reviewId);
                 if (review == null)
                 {
-                    return NotFound(new { message = "Review not found" });
+                    var notFound = ResponseStatus<object>.Create<BasicResponse<object>>("04", "Review not found", null, false);
+                    return NotFound(notFound);
                 }
 
                 // Check if user has already reported this review
@@ -357,7 +389,8 @@ namespace LinkojaMicroservice.Controllers
 
                 if (existingReport != null)
                 {
-                    return BadRequest(new { message = "You have already reported this review" });
+                    var badReq = ResponseStatus<object>.Create<BasicResponse<object>>("01", "You have already reported this review", null, false);
+                    return BadRequest(badReq);
                 }
 
                 // Create report
@@ -374,11 +407,13 @@ namespace LinkojaMicroservice.Controllers
                 _context.ReviewReports.Add(report);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Review reported successfully", reportId = report.Id });
+                var ok = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Review reported successfully", new { reportId = report.Id }, true);
+                return Ok(ok);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while reporting the review", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while reporting the review", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 

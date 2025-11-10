@@ -24,11 +24,13 @@ namespace LinkojaMicroservice.Controllers
             try
             {
                 await _otpService.SendOtp(request.PhoneNumber);
-                return Ok(new { message = "OTP sent successfully" });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "OTP sent successfully", null, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while sending OTP", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while sending OTP", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -41,20 +43,24 @@ namespace LinkojaMicroservice.Controllers
                 var result = await _otpService.VerifyOtp(request.PhoneNumber, request.OtpCode);
                 if (result)
                 {
-                    return Ok(new { message = "Phone number verified successfully", verified = true });
+                    var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Phone number verified successfully", new { verified = true }, true);
+                    return Ok(response);
                 }
                 else
                 {
-                    return BadRequest(new { message = "Verification failed" });
+                    var response = ResponseStatus<object>.Create<BasicResponse<object>>("01", "Verification failed", null, false);
+                    return BadRequest(response);
                 }
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("01", ex.Message, null, false);
+                return BadRequest(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred during verification", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred during verification", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -64,15 +70,18 @@ namespace LinkojaMicroservice.Controllers
             try
             {
                 await _otpService.ResendOtp(request.PhoneNumber);
-                return Ok(new { message = "OTP resent successfully" });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "OTP resent successfully", null, true);
+                return Ok(response);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("01", ex.Message, null, false);
+                return BadRequest(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while resending OTP", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while resending OTP", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
     }

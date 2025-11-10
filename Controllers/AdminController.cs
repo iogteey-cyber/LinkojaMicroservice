@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace LinkojaMicroservice.Controllers
@@ -37,11 +36,13 @@ namespace LinkojaMicroservice.Controllers
                     .OrderByDescending(b => b.CreatedAt)
                     .ToListAsync();
 
-                return Ok(pendingBusinesses);
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Pending businesses fetched successfully", pendingBusinesses, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching pending businesses", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching pending businesses", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -53,12 +54,14 @@ namespace LinkojaMicroservice.Controllers
                 var business = await _context.Businesses.FindAsync(id);
                 if (business == null)
                 {
-                    return NotFound(new { message = "Business not found" });
+                    var notFound = ResponseStatus<object>.Create<BasicResponse<object>>("04", "Business not found", null, false);
+                    return NotFound(notFound);
                 }
 
                 if (request.Status != "verified" && request.Status != "rejected")
                 {
-                    return BadRequest(new { message = "Status must be 'verified' or 'rejected'" });
+                    var bad = ResponseStatus<object>.Create<BasicResponse<object>>("01", "Status must be 'verified' or 'rejected'", null, false);
+                    return BadRequest(bad);
                 }
 
                 business.Status = request.Status;
@@ -99,11 +102,13 @@ namespace LinkojaMicroservice.Controllers
                     // Don't fail if email fails
                 }
 
-                return Ok(new { message = $"Business {request.Status} successfully", business });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", $"Business {request.Status} successfully", business, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while approving business", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while approving business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -122,11 +127,13 @@ namespace LinkojaMicroservice.Controllers
                     TotalReviews = await _context.BusinessReviews.CountAsync()
                 };
 
-                return Ok(analytics);
+                var response = ResponseStatus<BusinessAnalyticsDto>.Create<BasicResponse<BusinessAnalyticsDto>>("00", "Analytics fetched successfully", analytics, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching analytics", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching analytics", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -146,11 +153,13 @@ namespace LinkojaMicroservice.Controllers
                 }
 
                 var businesses = await query.OrderByDescending(b => b.CreatedAt).ToListAsync();
-                return Ok(businesses);
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Businesses fetched successfully", businesses, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching businesses", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching businesses", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -162,17 +171,20 @@ namespace LinkojaMicroservice.Controllers
                 var business = await _context.Businesses.FindAsync(id);
                 if (business == null)
                 {
-                    return NotFound(new { message = "Business not found" });
+                    var notFound = ResponseStatus<object>.Create<BasicResponse<object>>("04", "Business not found", null, false);
+                    return NotFound(notFound);
                 }
 
                 _context.Businesses.Remove(business);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Business deleted successfully" });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Business deleted successfully", null, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while deleting business", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while deleting business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -206,11 +218,13 @@ namespace LinkojaMicroservice.Controllers
                     CreatedAt = r.CreatedAt
                 }).ToList();
 
-                return Ok(reportDtos);
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Review reports fetched successfully", reportDtos, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching reports", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching reports", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -225,7 +239,8 @@ namespace LinkojaMicroservice.Controllers
 
                 if (report == null)
                 {
-                    return NotFound(new { message = "Report not found" });
+                    var notFound = ResponseStatus<object>.Create<BasicResponse<object>>("04", "Report not found", null, false);
+                    return NotFound(notFound);
                 }
 
                 if (action == "delete-review")
@@ -243,16 +258,19 @@ namespace LinkojaMicroservice.Controllers
                 }
                 else
                 {
-                    return BadRequest(new { message = "Invalid action. Use 'delete-review' or 'dismiss'" });
+                    var bad = ResponseStatus<object>.Create<BasicResponse<object>>("01", "Invalid action. Use 'delete-review' or 'dismiss'", null, false);
+                    return BadRequest(bad);
                 }
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = $"Report {report.Status} successfully" });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", $"Report {report.Status} successfully", null, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while resolving the report", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while resolving the report", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
     }
