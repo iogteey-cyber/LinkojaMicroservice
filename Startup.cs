@@ -67,6 +67,18 @@ namespace LinkojaMicroservice
                     };
                 });
 
+            // CORS - allow any origin, method, and header (handles OPTIONS preflight)
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
+
             // Add controllers
             services.AddControllers();
 
@@ -119,6 +131,9 @@ namespace LinkojaMicroservice
 
             app.UseHttpsRedirection();
             app.UseRouting();
+
+            // Enable CORS before authentication/authorization so preflight (OPTIONS) gets the headers
+            app.UseCors("AllowAll");
 
             // Use authentication and authorization
             app.UseAuthentication();
