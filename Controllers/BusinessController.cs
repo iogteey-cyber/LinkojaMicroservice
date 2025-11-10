@@ -36,6 +36,57 @@ namespace LinkojaMicroservice.Controllers
             return userId;
         }
 
+        [HttpGet("GetBusinesses")]
+        public async Task<IActionResult> GetAllBusinesses(
+   
+    [FromQuery] double? latitude = null,
+    [FromQuery] double? longitude = null,
+    [FromQuery] double? radiusKm = null)
+        {
+            try
+            {
+                var businesses = await _businessService.GetAllBusinesses();
+
+                // Filter by location if coordinates provided
+                if (latitude.HasValue && longitude.HasValue && radiusKm.HasValue)
+                {
+                    businesses = businesses.Where(b =>
+                        b.Latitude.HasValue &&
+                        b.Longitude.HasValue &&
+                        CalculateDistance(latitude.Value, longitude.Value, b.Latitude.Value, b.Longitude.Value) <= radiusKm.Value
+                    ).ToList();
+                }
+
+                var businessDtos = businesses.Select(b => new BusinessDto
+                {
+                    Id = b.Id,
+                    OwnerId = b.OwnerId,
+                    OwnerName = b.Owner?.Name,
+                    Name = b.Name,
+                    LogoUrl = b.LogoUrl,
+                    CoverPhotoUrl = b.CoverPhotoUrl,
+                    Description = b.Description,
+                    Category = b.Category,
+                    Address = b.Address,
+                    Latitude = b.Latitude,
+                    Longitude = b.Longitude,
+                    Status = b.Status,
+                    ReviewCount = b.Reviews?.Count ?? 0,
+                    AverageRating = b.Reviews?.Any() == true ? b.Reviews.Average(r => r.Rating) : 0,
+                    FollowerCount = b.Followers?.Count ?? 0,
+                    CreatedAt = b.CreatedAt,
+                    UpdatedAt = b.UpdatedAt
+                }).ToList();
+
+                var response = ResponseStatus<List<BusinessDto>>.Create<BasicResponse<List<BusinessDto>>>("00", "Businesses fetched successfully", businessDtos, true);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching businesses", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
         [HttpGet]
         public async Task<IActionResult> GetAllBusinesses(
             [FromQuery] string category = null, 
@@ -413,6 +464,88 @@ namespace LinkojaMicroservice.Controllers
             catch (Exception ex)
             {
                 var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while reporting the review", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
+
+        [HttpGet("by-email")]
+        public async Task<IActionResult> GetByEmail([FromQuery] string email)
+        {
+            try
+            {
+                var business = await _businessService.GetBusinessByEmail(email);
+                var dto = new BusinessDto
+                {
+                    Id = business.Id,
+                    OwnerId = business.OwnerId,
+                    OwnerName = business.Owner?.Name,
+                    Name = business.Name,
+                    LogoUrl = business.LogoUrl,
+                    CoverPhotoUrl = business.CoverPhotoUrl,
+                    Description = business.Description,
+                    Category = business.Category,
+                    Address = business.Address,
+                    Latitude = business.Latitude,
+                    Longitude = business.Longitude,
+                    Status = business.Status,
+                    ReviewCount = business.Reviews?.Count ??0,
+                    AverageRating = business.Reviews?.Any() == true ? business.Reviews.Average(r => r.Rating) :0,
+                    FollowerCount = business.Followers?.Count ??0,
+                    CreatedAt = business.CreatedAt,
+                    UpdatedAt = business.UpdatedAt
+                };
+                var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business fetched successfully", dto, true);
+                return Ok(response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
+
+        [HttpGet("by-phone")]
+        public async Task<IActionResult> GetByPhone([FromQuery] string phone)
+        {
+            try
+            {
+                var business = await _businessService.GetBusinessByPhone(phone);
+                var dto = new BusinessDto
+                {
+                    Id = business.Id,
+                    OwnerId = business.OwnerId,
+                    OwnerName = business.Owner?.Name,
+                    Name = business.Name,
+                    LogoUrl = business.LogoUrl,
+                    CoverPhotoUrl = business.CoverPhotoUrl,
+                    Description = business.Description,
+                    Category = business.Category,
+                    Address = business.Address,
+                    Latitude = business.Latitude,
+                    Longitude = business.Longitude,
+                    Status = business.Status,
+                    ReviewCount = business.Reviews?.Count ??0,
+                    AverageRating = business.Reviews?.Any() == true ? business.Reviews.Average(r => r.Rating) :0,
+                    FollowerCount = business.Followers?.Count ??0,
+                    CreatedAt = business.CreatedAt,
+                    UpdatedAt = business.UpdatedAt
+                };
+                var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business fetched successfully", dto, true);
+                return Ok(response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching the business", new { error = ex.Message }, false);
                 return StatusCode(500, response);
             }
         }
