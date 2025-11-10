@@ -22,6 +22,34 @@ namespace LinkojaMicroservice.Services
 
         public async Task<Business> CreateBusiness(int ownerId, CreateBusinessRequest request)
         {
+            // Duplicate validations (case-insensitive trim comparisons)
+            string name = request.Name?.Trim();
+            string logo = request.LogoUrl?.Trim();
+            string cover = request.CoverPhotoUrl?.Trim();
+            string email = request.Email?.Trim();
+            string website = request.Website?.Trim();
+
+            if (await _context.Businesses.AnyAsync(b => b.OwnerId == ownerId && b.Name.ToLower() == name.ToLower()))
+            {
+                throw new InvalidOperationException("You already have a business with this name.");
+            }
+            if (!string.IsNullOrEmpty(email) && await _context.Businesses.AnyAsync(b => b.Email != null && b.Email.ToLower() == email.ToLower()))
+            {
+                throw new InvalidOperationException("A business with this email already exists.");
+            }
+            if (!string.IsNullOrEmpty(website) && await _context.Businesses.AnyAsync(b => b.Website != null && b.Website.ToLower() == website.ToLower()))
+            {
+                throw new InvalidOperationException("A business with this website already exists.");
+            }
+            if (!string.IsNullOrEmpty(logo) && await _context.Businesses.AnyAsync(b => b.LogoUrl != null && b.LogoUrl.ToLower() == logo.ToLower()))
+            {
+                throw new InvalidOperationException("Logo URL already in use by another business.");
+            }
+            if (!string.IsNullOrEmpty(cover) && await _context.Businesses.AnyAsync(b => b.CoverPhotoUrl != null && b.CoverPhotoUrl.ToLower() == cover.ToLower()))
+            {
+                throw new InvalidOperationException("Cover photo URL already in use by another business.");
+            }
+
             var business = new Business
             {
                 OwnerId = ownerId,
@@ -34,6 +62,8 @@ namespace LinkojaMicroservice.Services
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
                 VerificationDocUrl = request.VerificationDocUrl,
+                Email = request.Email,
+                Website = request.Website,
                 Status = "pending",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -58,6 +88,35 @@ namespace LinkojaMicroservice.Services
                 throw new UnauthorizedAccessException("You are not authorized to update this business");
             }
 
+            // Prepare trimmed values
+            string newName = request.Name?.Trim();
+            string newLogo = request.LogoUrl?.Trim();
+            string newCover = request.CoverPhotoUrl?.Trim();
+            string newEmail = request.Email?.Trim();
+            string newWebsite = request.Website?.Trim();
+
+            // Duplicate checks excluding current business
+            if (!string.IsNullOrEmpty(newName) && await _context.Businesses.AnyAsync(b => b.Id != businessId && b.OwnerId == userId && b.Name.ToLower() == newName.ToLower()))
+            {
+                throw new InvalidOperationException("You already have another business with this name.");
+            }
+            if (!string.IsNullOrEmpty(newEmail) && await _context.Businesses.AnyAsync(b => b.Id != businessId && b.Email != null && b.Email.ToLower() == newEmail.ToLower()))
+            {
+                throw new InvalidOperationException("Another business already uses this email.");
+            }
+            if (!string.IsNullOrEmpty(newWebsite) && await _context.Businesses.AnyAsync(b => b.Id != businessId && b.Website != null && b.Website.ToLower() == newWebsite.ToLower()))
+            {
+                throw new InvalidOperationException("Another business already uses this website.");
+            }
+            if (!string.IsNullOrEmpty(newLogo) && await _context.Businesses.AnyAsync(b => b.Id != businessId && b.LogoUrl != null && b.LogoUrl.ToLower() == newLogo.ToLower()))
+            {
+                throw new InvalidOperationException("Logo URL is already used by another business.");
+            }
+            if (!string.IsNullOrEmpty(newCover) && await _context.Businesses.AnyAsync(b => b.Id != businessId && b.CoverPhotoUrl != null && b.CoverPhotoUrl.ToLower() == newCover.ToLower()))
+            {
+                throw new InvalidOperationException("Cover photo URL is already used by another business.");
+            }
+
             if (!string.IsNullOrEmpty(request.Name))
                 business.Name = request.Name;
             if (!string.IsNullOrEmpty(request.LogoUrl))
@@ -74,6 +133,10 @@ namespace LinkojaMicroservice.Services
                 business.Latitude = request.Latitude;
             if (request.Longitude.HasValue)
                 business.Longitude = request.Longitude;
+            if (!string.IsNullOrEmpty(request.Email))
+                business.Email = request.Email;
+            if (!string.IsNullOrEmpty(request.Website))
+                business.Website = request.Website;
 
             business.UpdatedAt = DateTime.UtcNow;
 
@@ -267,8 +330,8 @@ namespace LinkojaMicroservice.Services
                 Content = request.Content,
                 ImageUrl = request.ImageUrl,
                 VideoUrl = request.VideoUrl,
-                Likes = 0,
-                Comments = 0,
+                Likes =0,
+                Comments =0,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

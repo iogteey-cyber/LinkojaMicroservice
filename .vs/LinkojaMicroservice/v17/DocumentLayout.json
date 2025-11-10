@@ -3,6 +3,18 @@
   "WorkspaceRootPath": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|c:\\users\\tayo.olawunmi\\source\\repos\\linkojamicroservice\\services\\businessservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|solutionrelative:services\\businessservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|c:\\users\\tayo.olawunmi\\source\\repos\\linkojamicroservice\\models\\business.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|solutionrelative:models\\business.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|c:\\users\\tayo.olawunmi\\source\\repos\\linkojamicroservice\\flutterapp\\api_integration.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|solutionrelative:flutterapp\\api_integration.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|c:\\users\\tayo.olawunmi\\source\\repos\\linkojamicroservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -61,6 +73,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|c:\\users\\tayo.olawunmi\\source\\repos\\linkojamicroservice\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|solutionrelative:controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|c:\\users\\tayo.olawunmi\\source\\repos\\linkojamicroservice\\dtos\\businessdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{579D1C08-EA98-5198-D765-16D0A714EC9E}|LinkojaMicroservice.csproj|solutionrelative:dtos\\businessdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -70,7 +86,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -78,20 +94,72 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 18,
+              "Title": "BusinessDtos.cs",
+              "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\DTOs\\BusinessDtos.cs",
+              "RelativeDocumentMoniker": "DTOs\\BusinessDtos.cs",
+              "ToolTip": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\DTOs\\BusinessDtos.cs",
+              "RelativeToolTip": "DTOs\\BusinessDtos.cs",
+              "ViewState": "AgIAAFYAAAAAAAAAAABZwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-10T13:28:00.117Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "BusinessService.cs",
+              "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Services\\BusinessService.cs",
+              "RelativeDocumentMoniker": "Services\\BusinessService.cs",
+              "ToolTip": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Services\\BusinessService.cs",
+              "RelativeToolTip": "Services\\BusinessService.cs",
+              "ViewState": "AgIAAFkBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-10T13:27:24.081Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Business.cs",
+              "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Models\\Business.cs",
+              "RelativeDocumentMoniker": "Models\\Business.cs",
+              "ToolTip": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Models\\Business.cs",
+              "RelativeToolTip": "Models\\Business.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-10T13:26:22.17Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "API_INTEGRATION.md",
+              "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\FlutterApp\\API_INTEGRATION.md",
+              "RelativeDocumentMoniker": "FlutterApp\\API_INTEGRATION.md",
+              "ToolTip": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\FlutterApp\\API_INTEGRATION.md",
+              "RelativeToolTip": "FlutterApp\\API_INTEGRATION.md",
+              "ViewState": "AgIAAFACAAAAAAAAAAAAAFYCAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-11-10T12:11:46.09Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
               "Title": "AdminController.cs",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Controllers\\AdminController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
               "ToolTip": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Controllers\\AdminController.cs",
               "RelativeToolTip": "Controllers\\AdminController.cs",
-              "ViewState": "AgIAABMBAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABIBAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-10T12:04:16.49Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 16,
               "Title": "NotificationController.cs",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Controllers\\NotificationController.cs",
               "RelativeDocumentMoniker": "Controllers\\NotificationController.cs",
@@ -104,7 +172,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 15,
               "Title": "BusinessController.cs",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Controllers\\BusinessController.cs",
               "RelativeDocumentMoniker": "Controllers\\BusinessController.cs",
@@ -117,7 +185,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 14,
               "Title": "VerificationController.cs",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Controllers\\VerificationController.cs",
               "RelativeDocumentMoniker": "Controllers\\VerificationController.cs",
@@ -130,20 +198,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
               "ToolTip": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Controllers\\AuthController.cs",
               "RelativeToolTip": "Controllers\\AuthController.cs",
-              "ViewState": "AgIAALIAAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAHQAAAAAAAAAAAAkwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-10T12:02:06.254Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 13,
               "Title": "Responses.cs",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\DTOs\\Responses.cs",
               "RelativeDocumentMoniker": "DTOs\\Responses.cs",
@@ -156,7 +224,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 12,
               "Title": "Startup.cs",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Startup.cs",
               "RelativeDocumentMoniker": "Startup.cs",
@@ -169,7 +237,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 11,
               "Title": ".gitignore",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\.gitignore",
               "RelativeDocumentMoniker": ".gitignore",
@@ -182,7 +250,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "DatabaseInitializer.cs",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Data\\DatabaseInitializer.cs",
               "RelativeDocumentMoniker": "Data\\DatabaseInitializer.cs",
@@ -195,7 +263,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -207,7 +275,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 8,
               "Title": "Dockerfile",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Dockerfile",
               "RelativeDocumentMoniker": "Dockerfile",
@@ -219,7 +287,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 7,
               "Title": "DEPLOYMENT.md",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\DEPLOYMENT.md",
               "RelativeDocumentMoniker": "DEPLOYMENT.md",
@@ -231,7 +299,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 6,
               "Title": "CONFIGURATION.md",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\CONFIGURATION.md",
               "RelativeDocumentMoniker": "CONFIGURATION.md",
@@ -243,7 +311,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 10,
               "Title": "AuthService.cs",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\Services\\AuthService.cs",
               "RelativeDocumentMoniker": "Services\\AuthService.cs",
@@ -256,7 +324,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 9,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",

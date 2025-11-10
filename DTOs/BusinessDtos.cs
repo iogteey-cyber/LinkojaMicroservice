@@ -23,6 +23,10 @@ namespace LinkojaMicroservice.DTOs
         public double? Longitude { get; set; }
         
         public string VerificationDocUrl { get; set; }
+        
+        [EmailAddress]
+        public string Email { get; set; }
+        public string Website { get; set; }
     }
 
     public class UpdateBusinessRequest
@@ -35,6 +39,9 @@ namespace LinkojaMicroservice.DTOs
         public string Address { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        [EmailAddress]
+        public string Email { get; set; }
+        public string Website { get; set; }
     }
 
     public class BusinessDto
@@ -56,6 +63,8 @@ namespace LinkojaMicroservice.DTOs
         public int FollowerCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public string Email { get; set; }
+        public string Website { get; set; }
     }
 
     public class CreateReviewRequest
