@@ -11,7 +11,7 @@ namespace LinkojaMicroservice.Utilities
         {
             try
             {
-                // 1) DATABASE_URL -> ConnectionStrings__DefaultConnection
+                //1) DATABASE_URL -> ConnectionStrings__DefaultConnection
                 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
                 var existingConn = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
                 if (!string.IsNullOrEmpty(databaseUrl) && string.IsNullOrEmpty(existingConn))
@@ -23,8 +23,11 @@ namespace LinkojaMicroservice.Utilities
                     }
                 }
 
-                // 2) If a separate DB password is provided, override the password in the connection string
-                var dbPassword = Environment.GetEnvironmentVariable("YOUR_DB_PASSWORD_HERE");
+                //2) If a separate DB password is provided, override the password in the connection string
+                var dbPassword =
+                    Environment.GetEnvironmentVariable("DB_PASSWORD") ??
+                    Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ??
+                    Environment.GetEnvironmentVariable("PGPASSWORD");
                 if (!string.IsNullOrEmpty(dbPassword))
                 {
                     var cs = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
@@ -45,13 +48,33 @@ namespace LinkojaMicroservice.Utilities
                     }
                 }
 
-                // 3) Map other app secrets to hierarchical config keys so builder.Configuration["X:Y"] works
-                CopyIfPresent("YOUR_JWT_SECRET_KEY_HERE_MINIM", "Jwt__Secret");
-                CopyIfPresent("YOUR_EMAIL", "Email__Address");
-                CopyIfPresent("YOUR_EMAIL_PASSWORD_HERE", "Email__Password");
-                CopyIfPresent("YOUR_TERMII_API_KEY_HERE", "Termii__ApiKey");
-                CopyIfPresent("YOUR_GOOGLE_CLIENT_ID_HERE", "Authentication__Google__ClientId");
-                CopyIfPresent("YOUR_GOOGLE_CLIENT_SECRET_HERE", "Authentication__Google__ClientSecret");
+                //3) Map other app secrets to hierarchical config keys so builder.Configuration["X:Y"] works
+                // NOTE: Host.CreateDefaultBuilder already reads env vars, so you can set these directly as
+                // Jwt__Key, SmtpSettings__Password, TermiiSettings__ApiKey, GoogleOAuthSettings__ClientId, etc.
+                // The mappings below are only to support alternative env var names used by some platforms.
+
+                // JWT
+                CopyIfPresent("JWT_SECRET", "Jwt__Key");
+                CopyIfPresent("JWT__KEY", "Jwt__Key");
+
+                // SMTP (from commonly used prefixes)
+                CopyIfPresent("SMTP__HOST", "SmtpSettings__Host");
+                CopyIfPresent("SMTP__PORT", "SmtpSettings__Port");
+                CopyIfPresent("SMTP__ENABLESSL", "SmtpSettings__EnableSsl");
+                CopyIfPresent("SMTP__FROMEMAIL", "SmtpSettings__FromEmail");
+                CopyIfPresent("SMTP__FROMNAME", "SmtpSettings__FromName");
+                CopyIfPresent("SMTP__USERNAME", "SmtpSettings__Username");
+                CopyIfPresent("SMTP__PASSWORD", "SmtpSettings__Password");
+
+                // Termii
+                CopyIfPresent("TERMII__APIKEY", "TermiiSettings__ApiKey");
+                CopyIfPresent("TERMII__SENDERID", "TermiiSettings__SenderId");
+                CopyIfPresent("TERMII__APIURL", "TermiiSettings__ApiUrl");
+                CopyIfPresent("TERMII__CHANNEL", "TermiiSettings__Channel");
+
+                // Google OAuth
+                CopyIfPresent("GOOGLEOAUTH__CLIENTID", "GoogleOAuthSettings__ClientId");
+                CopyIfPresent("GOOGLEOAUTH__CLIENTSECRET", "GoogleOAuthSettings__ClientSecret");
 
                 // Note: ASPNETCORE_ENVIRONMENT and ASPNETCORE_URLS are already direct env vars the host uses.
             }

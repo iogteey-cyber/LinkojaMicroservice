@@ -11,7 +11,7 @@
         "projectName": "LinkojaMicroservice",
         "projectPath": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\LinkojaMicroservice.csproj",
         "packagesPath": "C:\\Users\\Tayo.olawunmi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Tayo.olawunmi\\Source\\Repos\\LinkojaMicroservice\\obj\\",
+        "outputPath": "C:\\Users\\Tayo.olawunmi\\source\\repos\\LinkojaMicroservice\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
