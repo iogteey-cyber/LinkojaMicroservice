@@ -30,8 +30,8 @@ namespace LinkojaMicroservice.Models
         
         // New contact/branding fields
         [EmailAddress]
-        public string Email { get; set; }
-        public string Website { get; set; }
+        public string email { get; set; }
+        public string website { get; set; }
         
         public string Status { get; set; } = "pending"; // pending, verified, rejected
         

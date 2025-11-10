@@ -33,11 +33,11 @@ namespace LinkojaMicroservice.Services
             {
                 throw new InvalidOperationException("You already have a business with this name.");
             }
-            if (!string.IsNullOrEmpty(email) && await _context.Businesses.AnyAsync(b => b.Email != null && b.Email.ToLower() == email.ToLower()))
+            if (!string.IsNullOrEmpty(email) && await _context.Businesses.AnyAsync(b => b.email != null && b.email.ToLower() == email.ToLower()))
             {
                 throw new InvalidOperationException("A business with this email already exists.");
             }
-            if (!string.IsNullOrEmpty(website) && await _context.Businesses.AnyAsync(b => b.Website != null && b.Website.ToLower() == website.ToLower()))
+            if (!string.IsNullOrEmpty(website) && await _context.Businesses.AnyAsync(b => b.website != null && b.website.ToLower() == website.ToLower()))
             {
                 throw new InvalidOperationException("A business with this website already exists.");
             }
@@ -62,8 +62,8 @@ namespace LinkojaMicroservice.Services
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
                 VerificationDocUrl = request.VerificationDocUrl,
-                Email = request.Email,
-                Website = request.Website,
+                email = request.Email,
+                website = request.Website,
                 Status = "pending",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -100,11 +100,11 @@ namespace LinkojaMicroservice.Services
             {
                 throw new InvalidOperationException("You already have another business with this name.");
             }
-            if (!string.IsNullOrEmpty(newEmail) && await _context.Businesses.AnyAsync(b => b.Id != businessId && b.Email != null && b.Email.ToLower() == newEmail.ToLower()))
+            if (!string.IsNullOrEmpty(newEmail) && await _context.Businesses.AnyAsync(b => b.Id != businessId && b.email != null && b.email.ToLower() == newEmail.ToLower()))
             {
                 throw new InvalidOperationException("Another business already uses this email.");
             }
-            if (!string.IsNullOrEmpty(newWebsite) && await _context.Businesses.AnyAsync(b => b.Id != businessId && b.Website != null && b.Website.ToLower() == newWebsite.ToLower()))
+            if (!string.IsNullOrEmpty(newWebsite) && await _context.Businesses.AnyAsync(b => b.Id != businessId && b.website != null && b.website.ToLower() == newWebsite.ToLower()))
             {
                 throw new InvalidOperationException("Another business already uses this website.");
             }
@@ -134,9 +134,9 @@ namespace LinkojaMicroservice.Services
             if (request.Longitude.HasValue)
                 business.Longitude = request.Longitude;
             if (!string.IsNullOrEmpty(request.Email))
-                business.Email = request.Email;
+                business.email = request.Email;
             if (!string.IsNullOrEmpty(request.Website))
-                business.Website = request.Website;
+                business.website = request.Website;
 
             business.UpdatedAt = DateTime.UtcNow;
 
@@ -177,9 +177,22 @@ namespace LinkojaMicroservice.Services
                 query = query.Where(b => b.Status == status);
             }
 
+
+
             return await query.ToListAsync();
         }
+        public async Task<List<Business>> GetAllBusinesses()
+        {
+            var query = _context.Businesses
+                .Include(b => b.Owner)
+                .Include(b => b.Reviews)
+                .AsQueryable();
 
+           
+
+
+            return await query.Where(b => b.Status == "approved").ToListAsync();
+        }
         public async Task<List<Business>> GetUserBusinesses(int userId)
         {
             return await _context.Businesses
@@ -340,6 +353,30 @@ namespace LinkojaMicroservice.Services
             await _context.SaveChangesAsync();
 
             return post;
+        }
+
+        public async Task<Business> GetBusinessByEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Email is required", nameof(email));
+            var business = await _context.Businesses
+                .Include(b => b.Owner)
+                .Include(b => b.Reviews)
+                .Include(b => b.Followers)
+                .FirstOrDefaultAsync(b => b.email != null && b.email.ToLower() == email.Trim().ToLower());
+            if (business == null) throw new KeyNotFoundException("Business not found");
+            return business;
+        }
+
+        public async Task<Business> GetBusinessByPhone(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone)) throw new ArgumentException("Phone is required", nameof(phone));
+            var business = await _context.Businesses
+                .Include(b => b.Owner)
+                .Include(b => b.Reviews)
+                .Include(b => b.Followers)
+                .FirstOrDefaultAsync(b => b.Owner != null && b.Owner.Phone != null && b.Owner.Phone == phone.Trim());
+            if (business == null) throw new KeyNotFoundException("Business not found");
+            return business;
         }
     }
 }

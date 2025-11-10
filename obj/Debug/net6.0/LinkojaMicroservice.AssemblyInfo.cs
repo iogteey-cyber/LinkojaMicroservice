@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LinkojaMicroservice")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+72fb84e097ab10a840163537406f31b7d0c0e008")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8b2dfd9e686d3ccc81fc786121b6ccf04a57a4f1")]
 [assembly: System.Reflection.AssemblyProductAttribute("LinkojaMicroservice")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LinkojaMicroservice")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
