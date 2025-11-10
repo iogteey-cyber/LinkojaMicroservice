@@ -28,6 +28,11 @@ namespace LinkojaMicroservice.Models
         
         public double? Longitude { get; set; }
         
+        // New contact/branding fields
+        [EmailAddress]
+        public string Email { get; set; }
+        public string Website { get; set; }
+        
         public string Status { get; set; } = "pending"; // pending, verified, rejected
         
         public string VerificationDocUrl { get; set; }
