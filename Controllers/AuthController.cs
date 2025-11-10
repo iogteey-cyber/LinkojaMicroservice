@@ -31,7 +31,7 @@ namespace LinkojaMicroservice.Controllers
                 var user = await _authService.Register(request.Email, request.Password, request.Phone, request.Name,request.SocialId);
                 var token = _authService.GenerateJwtToken(user);
 
-                var response = new AuthResponse
+                var responseData = new AuthResponse
                 {
                     Token = token,
                     User = new UserDto
@@ -44,17 +44,21 @@ namespace LinkojaMicroservice.Controllers
                     }
                 };
 
+                var response = ResponseStatus<AuthResponse>.Create<BasicResponse<AuthResponse>>("00", "Registration successful", responseData, true);
+
                 _logger.LogInformation("User registered successfully: {Email}, UserId: {UserId}", user.Email, user.Id);
                 return Ok(response);
             }
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning("Registration failed for {Email}: {Message}", request.Email, ex.Message);
-                return BadRequest(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("01", ex.Message, null, false);
+                return BadRequest(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred during registration", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred during registration", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -66,7 +70,7 @@ namespace LinkojaMicroservice.Controllers
                 var user = await _authService.Login(request.Email, request.Password);
                 var token = _authService.GenerateJwtToken(user);
 
-                var response = new AuthResponse
+                var responseData = new AuthResponse
                 {
                     Token = token,
                     User = new UserDto
@@ -78,16 +82,18 @@ namespace LinkojaMicroservice.Controllers
                         Role = user.Role
                     }
                 };
-
+                var response = ResponseStatus<AuthResponse>.Create<BasicResponse<AuthResponse>>("00", "Login successful", responseData, true);
                 return Ok(response);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("02", ex.Message, null, false);
+                return Unauthorized(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred during login", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred during login", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -97,19 +103,18 @@ namespace LinkojaMicroservice.Controllers
             try
             {
                 var token = await _authService.GeneratePasswordResetToken(request.Email);
-                
-                // In production, send this token via email
-                // For now, return it in response (not secure for production)
-                return Ok(new { message = "Password reset token generated", token = token });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Password reset token generated", new { token }, true);
+                return Ok(response);
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                // Return success even if email doesn't exist (security best practice)
-                return Ok(new { message = "If the email exists, a reset link will be sent" });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "If the email exists, a reset link will be sent", null, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -119,15 +124,18 @@ namespace LinkojaMicroservice.Controllers
             try
             {
                 await _authService.ResetPassword(request.Token, request.NewPassword);
-                return Ok(new { message = "Password reset successfully" });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Password reset successfully", null, true);
+                return Ok(response);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("01", ex.Message, null, false);
+                return BadRequest(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -139,19 +147,23 @@ namespace LinkojaMicroservice.Controllers
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
                 await _authService.ChangePassword(userId, request.CurrentPassword, request.NewPassword);
-                return Ok(new { message = "Password changed successfully" });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Password changed successfully", null, true);
+                return Ok(response);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("02", ex.Message, null, false);
+                return Unauthorized(response);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -170,7 +182,7 @@ namespace LinkojaMicroservice.Controllers
                 
                 var token = _authService.GenerateJwtToken(user);
 
-                var response = new AuthResponse
+                var responseData = new AuthResponse
                 {
                     Token = token,
                     User = new UserDto
@@ -183,11 +195,13 @@ namespace LinkojaMicroservice.Controllers
                     }
                 };
 
+                var response = ResponseStatus<AuthResponse>.Create<BasicResponse<AuthResponse>>("00", "Social login successful", responseData, true);
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred during social login", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred during social login", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
     }

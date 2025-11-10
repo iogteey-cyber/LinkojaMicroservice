@@ -51,11 +51,13 @@ namespace LinkojaMicroservice.Controllers
                     CreatedAt = n.CreatedAt
                 }).ToList();
 
-                return Ok(notificationDtos);
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Notifications fetched successfully", notificationDtos, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching notifications", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching notifications", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -66,11 +68,13 @@ namespace LinkojaMicroservice.Controllers
             {
                 var userId = GetUserId();
                 var count = await _notificationService.GetUnreadCount(userId);
-                return Ok(new { count });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Unread count fetched successfully", new { count }, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while fetching unread count", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching unread count", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -84,16 +88,19 @@ namespace LinkojaMicroservice.Controllers
 
                 if (result)
                 {
-                    return Ok(new { message = "Notification marked as read" });
+                    var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Notification marked as read", null, true);
+                    return Ok(response);
                 }
                 else
                 {
-                    return NotFound(new { message = "Notification not found" });
+                    var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", "Notification not found", null, false);
+                    return NotFound(response);
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
 
@@ -104,11 +111,13 @@ namespace LinkojaMicroservice.Controllers
             {
                 var userId = GetUserId();
                 await _notificationService.MarkAllAsRead(userId);
-                return Ok(new { message = "All notifications marked as read" });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "All notifications marked as read", null, true);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred", error = ex.Message });
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred", new { error = ex.Message }, false);
+                return StatusCode(500, response);
             }
         }
     }
