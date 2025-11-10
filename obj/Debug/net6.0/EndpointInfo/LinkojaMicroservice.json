@@ -966,6 +966,15 @@
           "verificationDocUrl": {
             "type": "string",
             "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          },
+          "website": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -1192,6 +1201,15 @@
           "longitude": {
             "type": "number",
             "format": "double",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          },
+          "website": {
+            "type": "string",
             "nullable": true
           }
         },
