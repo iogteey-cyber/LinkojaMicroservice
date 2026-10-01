@@ -44,6 +44,7 @@ namespace LinkojaMicroservice
             // Register services
             services.AddScoped<LinkojaMicroservice.Services.IAuthService, LinkojaMicroservice.Services.AuthService>();
             services.AddScoped<LinkojaMicroservice.Services.IBusinessService, LinkojaMicroservice.Services.BusinessService>();
+            services.AddScoped<LinkojaMicroservice.Services.IBusinessIdGeneratorService, LinkojaMicroservice.Services.BusinessIdGeneratorService>();
             services.AddScoped<LinkojaMicroservice.Services.INotificationService, LinkojaMicroservice.Services.NotificationService>();
             services.AddScoped<LinkojaMicroservice.Services.IOtpService, LinkojaMicroservice.Services.OtpService>();
             services.AddScoped<LinkojaMicroservice.Services.IEmailService, LinkojaMicroservice.Services.EmailService>();

@@ -20,6 +20,9 @@ namespace LinkojaMicroservice.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<OtpVerification> OtpVerifications { get; set; }
         public DbSet<ReviewReport> ReviewReports { get; set; }
+        public DbSet<BusinessProduct> BusinessProducts { get; set; }
+        public DbSet<LocationCode> LocationCodes { get; set; }
+        public DbSet<BusinessIdSequence> BusinessIdSequences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +45,31 @@ namespace LinkojaMicroservice.Data
                     .WithMany()
                     .HasForeignKey(e => e.OwnerId)
                     .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(e => e.BusinessId).IsUnique();
+            });
+
+            // Configure BusinessProduct entity
+            modelBuilder.Entity<BusinessProduct>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasOne(e => e.Business)
+                    .WithMany(b => b.Products)
+                    .HasForeignKey(e => e.BusinessId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure LocationCode entity
+            modelBuilder.Entity<LocationCode>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.Type, e.Value }).IsUnique();
+            });
+
+            // Configure BusinessIdSequence entity
+            modelBuilder.Entity<BusinessIdSequence>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.AreaCode, e.RoadCode, e.StreetCode }).IsUnique();
             });
 
             // Configure BusinessReview entity

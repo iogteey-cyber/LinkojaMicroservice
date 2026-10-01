@@ -23,11 +23,24 @@ namespace LinkojaMicroservice.Models
         public string Category { get; set; }
         
         public string Address { get; set; }
-        
+
+        // Structured location fields (used for search/filtering and permanent BusinessId generation)
+        public string Area { get; set; }
+
+        public string Road { get; set; }
+
+        public string Street { get; set; }
+
         public double? Latitude { get; set; }
         
         public double? Longitude { get; set; }
-        
+
+        // Permanent Linkoja Business ID, e.g. "LNK0101001001". Generated once at creation and never changed.
+        public string BusinessId { get; set; }
+
+        // Separate from Status (pending/verified/rejected) - used for admin activate/deactivate toggling
+        public bool IsActive { get; set; } = true;
+
         // New contact/branding fields
         [EmailAddress]
         public string email { get; set; }
@@ -45,5 +58,6 @@ namespace LinkojaMicroservice.Models
         public ICollection<BusinessFollower> Followers { get; set; }
         public ICollection<BusinessPost> Posts { get; set; }
         public ICollection<BusinessCategory> BusinessCategories { get; set; }
+        public ICollection<BusinessProduct> Products { get; set; }
     }
 }

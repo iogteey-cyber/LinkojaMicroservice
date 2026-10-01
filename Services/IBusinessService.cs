@@ -20,5 +20,19 @@ namespace LinkojaMicroservice.Services
         Task<bool> UnfollowBusiness(int businessId, int userId);
         Task<BusinessPost> CreatePost(int businessId, int userId, CreatePostRequest request);
         Task<List<Business>> GetAllBusinesses();
+        Task<BusinessProduct> AddProduct(int businessId, int userId, CreateBusinessProductRequest request);
+        Task<BusinessProduct> UpdateProduct(int businessId, int productId, int userId, UpdateBusinessProductRequest request);
+        Task<bool> DeleteProduct(int businessId, int productId, int userId);
+        Task<List<Business>> SearchBusinesses(
+            string? q = null,
+            string? category = null,
+            string? subcategory = null,
+            string? area = null,
+            string? road = null,
+            string? street = null,
+            double? latitude = null,
+            double? longitude = null,
+            double? radiusKm = null);
     }
 }
+

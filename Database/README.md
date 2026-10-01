@@ -7,7 +7,8 @@ This directory contains SQL scripts for setting up the Linkoja Microservice data
 ### `CreateTables.sql`
 Complete database schema creation script for PostgreSQL. This script:
 - Uses `CREATE TABLE IF NOT EXISTS` for idempotent execution
-- Creates all 11 tables with proper relationships
+- Creates all 13 tables with proper relationships
+- Uses `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` for additive column changes on existing tables
 - Adds indexes for performance optimization
 - Includes foreign key constraints
 - Creates a default admin user (if not exists)
@@ -18,15 +19,18 @@ Complete database schema creation script for PostgreSQL. This script:
 The schema includes the following tables:
 
 1. **Users** - User accounts (customers, business owners, admins)
-2. **Businesses** - Business profiles
+2. **Businesses** - Business profiles (includes structured location: Area/Road/Street, a permanent `BusinessId`, and `IsActive`)
 3. **BusinessReviews** - Customer reviews and ratings (1-5 stars)
 4. **BusinessFollowers** - User-business follow relationships
 5. **BusinessPosts** - Business updates and posts
-6. **BusinessCategories** - Category tags for businesses
+6. **BusinessCategories** - Category/subcategory tags for businesses
 7. **PasswordResetTokens** - Password reset token management
 8. **Notifications** - In-app notifications for users
 9. **OtpVerifications** - OTP codes for phone verification
 10. **ReviewReports** - Abuse reports for reviews
+11. **BusinessProducts** - Descriptive products/services catalogue per business (no price/cart/order data)
+12. **LocationCodes** - Deterministic Area/Road/Street code lookup used to generate permanent BusinessIds
+13. **BusinessIdSequences** - Per-location sequence counters used to generate permanent BusinessIds
 
 ## Usage
 

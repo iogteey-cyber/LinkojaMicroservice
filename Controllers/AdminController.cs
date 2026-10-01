@@ -1,5 +1,6 @@
 using LinkojaMicroservice.DTOs;
 using LinkojaMicroservice.Data;
+using LinkojaMicroservice.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +18,14 @@ namespace LinkojaMicroservice.Controllers
         private readonly ApplicationDbContext _context;
         private readonly Services.INotificationService _notificationService;
         private readonly Services.IEmailService _emailService;
+        private readonly Services.IBusinessIdGeneratorService _businessIdGenerator;
 
-        public AdminController(ApplicationDbContext context, Services.INotificationService notificationService, Services.IEmailService emailService)
+        public AdminController(ApplicationDbContext context, Services.INotificationService notificationService, Services.IEmailService emailService, Services.IBusinessIdGeneratorService businessIdGenerator)
         {
             _context = context;
             _notificationService = notificationService;
             _emailService = emailService;
+            _businessIdGenerator = businessIdGenerator;
         }
 
         [HttpGet("businesses/pending")]
@@ -159,6 +162,263 @@ namespace LinkojaMicroservice.Controllers
             catch (Exception ex)
             {
                 var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching businesses", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
+
+        [HttpPost("businesses")]
+        public async Task<IActionResult> CreateBusinessAdmin([FromBody] AdminCreateBusinessRequest request)
+        {
+            try
+            {
+                var owner = await _context.Users.FindAsync(request.OwnerId);
+                if (owner == null)
+                {
+                    var notFound = ResponseStatus<object>.Create<BasicResponse<object>>("04", "Owner not found", null, false);
+                    return NotFound(notFound);
+                }
+
+                var business = new Business
+                {
+                    OwnerId = request.OwnerId,
+                    Name = request.Name,
+                    LogoUrl = request.LogoUrl,
+                    CoverPhotoUrl = request.CoverPhotoUrl,
+                    Description = request.Description,
+                    Category = request.Category,
+                    Address = request.Address,
+                    Area = request.Area,
+                    Road = request.Road,
+                    Street = request.Street,
+                    Latitude = request.Latitude,
+                    Longitude = request.Longitude,
+                    VerificationDocUrl = request.VerificationDocUrl,
+                    email = request.Email,
+                    website = request.Website,
+                    Status = "pending",
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                business.BusinessId = await _businessIdGenerator.GenerateBusinessId(request.Area, request.Road, request.Street);
+
+                _context.Businesses.Add(business);
+                await _context.SaveChangesAsync();
+
+                var businessDto = BusinessController.MapToDto(business);
+                var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business created successfully", businessDto, true);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while creating the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
+
+        [HttpPut("businesses/{id}")]
+        public async Task<IActionResult> UpdateBusinessAdmin(int id, [FromBody] AdminUpdateBusinessRequest request)
+        {
+            try
+            {
+                var business = await _context.Businesses
+                    .Include(b => b.BusinessCategories)
+                    .Include(b => b.Products)
+                    .FirstOrDefaultAsync(b => b.Id == id);
+                if (business == null)
+                {
+                    var notFound = ResponseStatus<object>.Create<BasicResponse<object>>("04", "Business not found", null, false);
+                    return NotFound(notFound);
+                }
+
+                if (!string.IsNullOrEmpty(request.Name))
+                    business.Name = request.Name;
+                if (!string.IsNullOrEmpty(request.LogoUrl))
+                    business.LogoUrl = request.LogoUrl;
+                if (!string.IsNullOrEmpty(request.CoverPhotoUrl))
+                    business.CoverPhotoUrl = request.CoverPhotoUrl;
+                if (!string.IsNullOrEmpty(request.Description))
+                    business.Description = request.Description;
+                if (!string.IsNullOrEmpty(request.Category))
+                    business.Category = request.Category;
+                if (!string.IsNullOrEmpty(request.Address))
+                    business.Address = request.Address;
+                if (!string.IsNullOrEmpty(request.Area))
+                    business.Area = request.Area;
+                if (!string.IsNullOrEmpty(request.Road))
+                    business.Road = request.Road;
+                if (!string.IsNullOrEmpty(request.Street))
+                    business.Street = request.Street;
+                if (request.Latitude.HasValue)
+                    business.Latitude = request.Latitude;
+                if (request.Longitude.HasValue)
+                    business.Longitude = request.Longitude;
+                if (!string.IsNullOrEmpty(request.Email))
+                    business.email = request.Email;
+                if (!string.IsNullOrEmpty(request.Website))
+                    business.website = request.Website;
+                if (!string.IsNullOrEmpty(request.Status))
+                    business.Status = request.Status;
+                if (request.IsActive.HasValue)
+                    business.IsActive = request.IsActive.Value;
+
+                // Full replace of category/subcategory assignments, if provided
+                if (request.Categories != null)
+                {
+                    _context.BusinessCategories.RemoveRange(business.BusinessCategories);
+                    foreach (var c in request.Categories)
+                    {
+                        _context.BusinessCategories.Add(new BusinessCategory
+                        {
+                            BusinessId = business.Id,
+                            CategoryName = c.CategoryName,
+                            Subcategory = c.Subcategory,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
+                }
+
+                // Full sync of product/service list, if provided
+                if (request.Products != null)
+                {
+                    var existingProducts = business.Products.ToList();
+                    var keepIds = request.Products.Where(p => p.Id > 0).Select(p => p.Id).ToHashSet();
+
+                    foreach (var existing in existingProducts)
+                    {
+                        if (!keepIds.Contains(existing.Id))
+                        {
+                            _context.BusinessProducts.Remove(existing);
+                        }
+                    }
+
+                    foreach (var p in request.Products)
+                    {
+                        if (p.Id > 0)
+                        {
+                            var existing = existingProducts.FirstOrDefault(e => e.Id == p.Id);
+                            if (existing != null)
+                            {
+                                if (!string.IsNullOrEmpty(p.Name))
+                                    existing.Name = p.Name;
+                                if (p.Description != null)
+                                    existing.Description = p.Description;
+                                if (p.PhotoUrl != null)
+                                    existing.PhotoUrl = p.PhotoUrl;
+                                if (!string.IsNullOrEmpty(p.Type))
+                                    existing.Type = p.Type;
+                            }
+                        }
+                        else
+                        {
+                            _context.BusinessProducts.Add(new Models.BusinessProduct
+                            {
+                                BusinessId = business.Id,
+                                Name = p.Name,
+                                Description = p.Description,
+                                PhotoUrl = p.PhotoUrl,
+                                Type = string.IsNullOrEmpty(p.Type) ? "Product" : p.Type,
+                                CreatedAt = DateTime.UtcNow
+                            });
+                        }
+                    }
+                }
+
+                business.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                var businessDto = BusinessController.MapToDto(business);
+                var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business updated successfully", businessDto, true);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while updating the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
+
+        [HttpGet("businesses/by-business-id/{businessId}")]
+        public async Task<IActionResult> GetBusinessByBusinessId(string businessId)
+        {
+            try
+            {
+                var business = await _context.Businesses
+                    .Include(b => b.Owner)
+                    .Include(b => b.Reviews)
+                    .Include(b => b.Followers)
+                    .Include(b => b.BusinessCategories)
+                    .Include(b => b.Products)
+                    .FirstOrDefaultAsync(b => b.BusinessId == businessId);
+
+                if (business == null)
+                {
+                    var notFound = ResponseStatus<object>.Create<BasicResponse<object>>("04", "Business not found", null, false);
+                    return NotFound(notFound);
+                }
+
+                var businessDto = BusinessController.MapToDto(business);
+                var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business fetched successfully", businessDto, true);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while fetching the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
+
+        [HttpPut("businesses/{id}/activate")]
+        public async Task<IActionResult> ActivateBusiness(int id)
+        {
+            try
+            {
+                var business = await _context.Businesses.FindAsync(id);
+                if (business == null)
+                {
+                    var notFound = ResponseStatus<object>.Create<BasicResponse<object>>("04", "Business not found", null, false);
+                    return NotFound(notFound);
+                }
+
+                business.IsActive = true;
+                business.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                var businessDto = BusinessController.MapToDto(business);
+                var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business activated successfully", businessDto, true);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while activating the business", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
+
+        [HttpPut("businesses/{id}/deactivate")]
+        public async Task<IActionResult> DeactivateBusiness(int id)
+        {
+            try
+            {
+                var business = await _context.Businesses.FindAsync(id);
+                if (business == null)
+                {
+                    var notFound = ResponseStatus<object>.Create<BasicResponse<object>>("04", "Business not found", null, false);
+                    return NotFound(notFound);
+                }
+
+                business.IsActive = false;
+                business.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                var businessDto = BusinessController.MapToDto(business);
+                var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business deactivated successfully", businessDto, true);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while deactivating the business", new { error = ex.Message }, false);
                 return StatusCode(500, response);
             }
         }

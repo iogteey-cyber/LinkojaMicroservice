@@ -248,6 +248,7 @@ part 'business_models.g.dart';
 @JsonSerializable()
 class BusinessDto {
  final int id;
+ final String? businessId;
  final int ownerId;
  final String? ownerName;
  final String name;
@@ -256,17 +257,24 @@ class BusinessDto {
  final String? description;
  final String? category;
  final String? address;
+ final String? area;
+ final String? road;
+ final String? street;
  final double? latitude;
  final double? longitude;
  final String status;
+ final bool isActive;
  final int reviewCount;
  final double averageRating;
  final int followerCount;
  final DateTime createdAt;
  final DateTime? updatedAt;
+ final List<BusinessCategoryDto>? categories;
+ final List<BusinessProductDto>? products;
 
  BusinessDto({
  required this.id,
+ this.businessId,
  required this.ownerId,
  this.ownerName,
  required this.name,
@@ -275,17 +283,42 @@ class BusinessDto {
  this.description,
  this.category,
  this.address,
+ this.area,
+ this.road,
+ this.street,
  this.latitude,
  this.longitude,
  required this.status,
+ required this.isActive,
  required this.reviewCount,
  required this.averageRating,
  required this.followerCount,
  required this.createdAt,
  this.updatedAt,
+ this.categories,
+ this.products,
  });
 
  factory BusinessDto.fromJson(Map<String, dynamic> json) => _$BusinessDtoFromJson(json);
+}
+
+@JsonSerializable()
+class BusinessCategoryDto {
+ final String? categoryName;
+ final String? subcategory;
+ BusinessCategoryDto({this.categoryName, this.subcategory});
+ factory BusinessCategoryDto.fromJson(Map<String, dynamic> json) => _$BusinessCategoryDtoFromJson(json);
+}
+
+@JsonSerializable()
+class BusinessProductDto {
+ final int id;
+ final String name;
+ final String? description;
+ final String? photoUrl;
+ final String type; // "Product" or "Service" - no price/cart data
+ BusinessProductDto({required this.id, required this.name, this.description, this.photoUrl, required this.type});
+ factory BusinessProductDto.fromJson(Map<String, dynamic> json) => _$BusinessProductDtoFromJson(json);
 }
 
 @JsonSerializable()
@@ -296,6 +329,9 @@ class CreateBusinessRequest {
  final String? description;
  final String? category;
  final String? address;
+ final String? area;
+ final String? road;
+ final String? street;
  final double? latitude;
  final double? longitude;
 
@@ -306,6 +342,9 @@ class CreateBusinessRequest {
  this.description,
  this.category,
  this.address,
+ this.area,
+ this.road,
+ this.street,
  this.latitude,
  this.longitude,
  });
@@ -459,8 +498,42 @@ abstract class ApiService {
  @GET("/api/business/my-businesses")
  Future<ApiResponse<List<Map<String, dynamic>>>> getMyBusinesses();
 
+ @GET("/api/business/search")
+ Future<ApiResponse<List<BusinessDto>>> searchBusinesses(
+ @Query("q") String? q,
+ @Query("category") String? category,
+ @Query("subcategory") String? subcategory,
+ @Query("area") String? area,
+ @Query("road") String? road,
+ @Query("street") String? street,
+ @Query("latitude") double? latitude,
+ @Query("longitude") double? longitude,
+ @Query("radiusKm") double? radiusKm,
+ );
+
  @GET("/api/business/{id}/insights")
  Future<ApiResponse<BusinessInsights>> getBusinessInsights(@Path("id") int id);
+
+ // Products & services (descriptive only - no price/cart/order fields)
+ @POST("/api/business/{id}/products")
+ Future<ApiResponse<Map<String, dynamic>>> addBusinessProduct(
+ @Path("id") int businessId,
+ @Body() Map<String, dynamic> body,
+ );
+ // body: { "name": "...", "description": "...", "photoUrl": "...", "type": "Product"|"Service" }
+
+ @PUT("/api/business/{id}/products/{productId}")
+ Future<ApiResponse<Map<String, dynamic>>> updateBusinessProduct(
+ @Path("id") int businessId,
+ @Path("productId") int productId,
+ @Body() Map<String, dynamic> body,
+ );
+
+ @DELETE("/api/business/{id}/products/{productId}")
+ Future<ApiResponse<Empty>> deleteBusinessProduct(
+ @Path("id") int businessId,
+ @Path("productId") int productId,
+ );
 
  // Reviews
  @POST("/api/business/{id}/reviews")
@@ -520,6 +593,31 @@ abstract class ApiService {
  @Path("reportId") int reportId,
  @Query("action") String action,
  );
+
+ // Admin business management
+ @POST("/api/admin/businesses")
+ Future<ApiResponse<Map<String, dynamic>>> adminCreateBusiness(@Body() Map<String, dynamic> body);
+ // body: CreateBusinessRequest fields (Name, Area, Road, Street, ...) + "ownerId"
+
+ @PUT("/api/admin/businesses/{id}")
+ Future<ApiResponse<Map<String, dynamic>>> adminUpdateBusiness(
+ @Path("id") int id,
+ @Body() Map<String, dynamic> body,
+ );
+ // body: location/status/isActive fields, "categories": [{categoryName, subcategory}],
+ // "products": [{id?, name, description, photoUrl, type}]
+
+ @GET("/api/admin/businesses/by-business-id/{businessId}")
+ Future<ApiResponse<Map<String, dynamic>>> adminGetBusinessByBusinessId(
+ @Path("businessId") String businessId,
+ );
+ // businessId is the permanent Linkoja BusinessId, e.g. "LNK0101001001"
+
+ @PUT("/api/admin/businesses/{id}/activate")
+ Future<ApiResponse<Map<String, dynamic>>> adminActivateBusiness(@Path("id") int id);
+
+ @PUT("/api/admin/businesses/{id}/deactivate")
+ Future<ApiResponse<Map<String, dynamic>>> adminDeactivateBusiness(@Path("id") int id);
 }
 ```
 

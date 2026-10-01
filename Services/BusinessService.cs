@@ -13,11 +13,13 @@ namespace LinkojaMicroservice.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly INotificationService _notificationService;
+        private readonly IBusinessIdGeneratorService _businessIdGenerator;
 
-        public BusinessService(ApplicationDbContext context, INotificationService notificationService)
+        public BusinessService(ApplicationDbContext context, INotificationService notificationService, IBusinessIdGeneratorService businessIdGenerator)
         {
             _context = context;
             _notificationService = notificationService;
+            _businessIdGenerator = businessIdGenerator;
         }
 
         public async Task<Business> CreateBusiness(int ownerId, CreateBusinessRequest request)
@@ -59,15 +61,21 @@ namespace LinkojaMicroservice.Services
                 Description = request.Description,
                 Category = request.Category,
                 Address = request.Address,
+                Area = request.Area,
+                Road = request.Road,
+                Street = request.Street,
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
                 VerificationDocUrl = request.VerificationDocUrl,
                 email = request.Email,
                 website = request.Website,
                 Status = "pending",
+                IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
+
+            business.BusinessId = await _businessIdGenerator.GenerateBusinessId(request.Area, request.Road, request.Street);
 
             _context.Businesses.Add(business);
             await _context.SaveChangesAsync();
@@ -129,6 +137,12 @@ namespace LinkojaMicroservice.Services
                 business.Category = request.Category;
             if (!string.IsNullOrEmpty(request.Address))
                 business.Address = request.Address;
+            if (!string.IsNullOrEmpty(request.Area))
+                business.Area = request.Area;
+            if (!string.IsNullOrEmpty(request.Road))
+                business.Road = request.Road;
+            if (!string.IsNullOrEmpty(request.Street))
+                business.Street = request.Street;
             if (request.Latitude.HasValue)
                 business.Latitude = request.Latitude;
             if (request.Longitude.HasValue)
@@ -150,6 +164,8 @@ namespace LinkojaMicroservice.Services
                 .Include(b => b.Owner)
                 .Include(b => b.Reviews)
                 .Include(b => b.Followers)
+                .Include(b => b.BusinessCategories)
+                .Include(b => b.Products)
                 .FirstOrDefaultAsync(b => b.Id == businessId);
 
             if (business == null)
@@ -165,6 +181,9 @@ namespace LinkojaMicroservice.Services
             var query = _context.Businesses
                 .Include(b => b.Owner)
                 .Include(b => b.Reviews)
+                .Include(b => b.Followers)
+                .Include(b => b.BusinessCategories)
+                .Include(b => b.Products)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(category))
@@ -186,6 +205,9 @@ namespace LinkojaMicroservice.Services
             var query = _context.Businesses
                 .Include(b => b.Owner)
                 .Include(b => b.Reviews)
+                .Include(b => b.Followers)
+                .Include(b => b.BusinessCategories)
+                .Include(b => b.Products)
                 .AsQueryable();
 
            
@@ -198,6 +220,8 @@ namespace LinkojaMicroservice.Services
             return await _context.Businesses
                 .Include(b => b.Reviews)
                 .Include(b => b.Followers)
+                .Include(b => b.BusinessCategories)
+                .Include(b => b.Products)
                 .Where(b => b.OwnerId == userId)
                 .ToListAsync();
         }
@@ -362,6 +386,8 @@ namespace LinkojaMicroservice.Services
                 .Include(b => b.Owner)
                 .Include(b => b.Reviews)
                 .Include(b => b.Followers)
+                .Include(b => b.BusinessCategories)
+                .Include(b => b.Products)
                 .FirstOrDefaultAsync(b => b.email != null && b.email.ToLower() == email.Trim().ToLower());
             if (business == null) throw new KeyNotFoundException("Business not found");
             return business;
@@ -374,9 +400,195 @@ namespace LinkojaMicroservice.Services
                 .Include(b => b.Owner)
                 .Include(b => b.Reviews)
                 .Include(b => b.Followers)
+                .Include(b => b.BusinessCategories)
+                .Include(b => b.Products)
                 .FirstOrDefaultAsync(b => b.Owner != null && b.Owner.Phone != null && b.Owner.Phone == phone.Trim());
             if (business == null) throw new KeyNotFoundException("Business not found");
             return business;
+        }
+
+        public async Task<BusinessProduct> AddProduct(int businessId, int userId, CreateBusinessProductRequest request)
+        {
+            var business = await _context.Businesses.FindAsync(businessId);
+            if (business == null)
+            {
+                throw new KeyNotFoundException("Business not found");
+            }
+
+            if (business.OwnerId != userId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to manage this business's products");
+            }
+
+            var product = new BusinessProduct
+            {
+                BusinessId = businessId,
+                Name = request.Name,
+                Description = request.Description,
+                PhotoUrl = request.PhotoUrl,
+                Type = string.IsNullOrEmpty(request.Type) ? "Product" : request.Type,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.BusinessProducts.Add(product);
+            await _context.SaveChangesAsync();
+
+            return product;
+        }
+
+        public async Task<BusinessProduct> UpdateProduct(int businessId, int productId, int userId, UpdateBusinessProductRequest request)
+        {
+            var business = await _context.Businesses.FindAsync(businessId);
+            if (business == null)
+            {
+                throw new KeyNotFoundException("Business not found");
+            }
+
+            if (business.OwnerId != userId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to manage this business's products");
+            }
+
+            var product = await _context.BusinessProducts
+                .FirstOrDefaultAsync(p => p.Id == productId && p.BusinessId == businessId);
+            if (product == null)
+            {
+                throw new KeyNotFoundException("Product/service not found");
+            }
+
+            if (!string.IsNullOrEmpty(request.Name))
+                product.Name = request.Name;
+            if (request.Description != null)
+                product.Description = request.Description;
+            if (request.PhotoUrl != null)
+                product.PhotoUrl = request.PhotoUrl;
+            if (!string.IsNullOrEmpty(request.Type))
+                product.Type = request.Type;
+
+            await _context.SaveChangesAsync();
+            return product;
+        }
+
+        public async Task<bool> DeleteProduct(int businessId, int productId, int userId)
+        {
+            var business = await _context.Businesses.FindAsync(businessId);
+            if (business == null)
+            {
+                throw new KeyNotFoundException("Business not found");
+            }
+
+            if (business.OwnerId != userId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to manage this business's products");
+            }
+
+            var product = await _context.BusinessProducts
+                .FirstOrDefaultAsync(p => p.Id == productId && p.BusinessId == businessId);
+            if (product == null)
+            {
+                throw new KeyNotFoundException("Product/service not found");
+            }
+
+            _context.BusinessProducts.Remove(product);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<Business>> SearchBusinesses(
+            string? q = null,
+            string? category = null,
+            string? subcategory = null,
+            string? area = null,
+            string? road = null,
+            string? street = null,
+            double? latitude = null,
+            double? longitude = null,
+            double? radiusKm = null)
+        {
+            var query = _context.Businesses
+                .Include(b => b.Owner)
+                .Include(b => b.Reviews)
+                .Include(b => b.Followers)
+                .Include(b => b.BusinessCategories)
+                .Include(b => b.Products)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var term = q.Trim().ToLower();
+                query = query.Where(b =>
+                    (b.Name != null && b.Name.ToLower().Contains(term)) ||
+                    (b.Description != null && b.Description.ToLower().Contains(term)) ||
+                    b.Products.Any(p => p.Name != null && p.Name.ToLower().Contains(term)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                var cat = category.Trim().ToLower();
+                query = query.Where(b =>
+                    (b.Category != null && b.Category.ToLower() == cat) ||
+                    b.BusinessCategories.Any(bc => bc.CategoryName != null && bc.CategoryName.ToLower() == cat));
+            }
+
+            if (!string.IsNullOrWhiteSpace(subcategory))
+            {
+                var sub = subcategory.Trim().ToLower();
+                query = query.Where(b =>
+                    b.BusinessCategories.Any(bc => bc.Subcategory != null && bc.Subcategory.ToLower() == sub));
+            }
+
+            if (!string.IsNullOrWhiteSpace(area))
+            {
+                var a = area.Trim().ToLower();
+                query = query.Where(b => b.Area != null && b.Area.ToLower() == a);
+            }
+
+            if (!string.IsNullOrWhiteSpace(road))
+            {
+                var r = road.Trim().ToLower();
+                query = query.Where(b => b.Road != null && b.Road.ToLower() == r);
+            }
+
+            if (!string.IsNullOrWhiteSpace(street))
+            {
+                var s = street.Trim().ToLower();
+                query = query.Where(b => b.Street != null && b.Street.ToLower() == s);
+            }
+
+            var businesses = await query.ToListAsync();
+
+            if (latitude.HasValue && longitude.HasValue && radiusKm.HasValue)
+            {
+                businesses = businesses.Where(b =>
+                    b.Latitude.HasValue &&
+                    b.Longitude.HasValue &&
+                    CalculateDistance(latitude.Value, longitude.Value, b.Latitude.Value, b.Longitude.Value) <= radiusKm.Value
+                ).ToList();
+            }
+
+            return businesses;
+        }
+
+        // Helper method to calculate distance between two points using Haversine formula (shared with search)
+        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double earthRadiusKm = 6371.0;
+
+            var dLat = DegreesToRadians(lat2 - lat1);
+            var dLon = DegreesToRadians(lon2 - lon1);
+
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(DegreesToRadians(lat1)) * Math.Cos(DegreesToRadians(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+            return earthRadiusKm * c;
+        }
+
+        private double DegreesToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180.0;
         }
     }
 }
