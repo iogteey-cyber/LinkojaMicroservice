@@ -151,12 +151,14 @@ Once the application is running, access the Swagger UI at:
 - `POST /api/verification/verify-otp` - Verify OTP code (requires authentication)
 - `POST /api/verification/resend-otp` - Resend OTP (60-second cooldown)
 
-#### Business Management (14 endpoints)
+#### Business Management (19 endpoints)
 
 - `GET /api/business` - Get all businesses (supports category, status, geolocation filters)
   - Query params: `?category=Food&latitude=6.5244&longitude=3.3792&radiusKm=5`
-- `GET /api/business/{id}` - Get business by ID
-- `POST /api/business` - Create a new business (requires authentication)
+- `GET /api/business/search` - Powerful search across businesses and their products/services
+  - Query params: `?q=shoes&category=Retail&subcategory=Footwear&area=Ikeja&road=Allen&street=Opebi&latitude=6.5244&longitude=3.3792&radiusKm=5`
+- `GET /api/business/{id}` - Get business by ID (includes `BusinessId`, structured location, category/subcategory assignments, and Products)
+- `POST /api/business` - Create a new business (requires authentication; accepts `Area`/`Road`/`Street` and auto-generates a permanent `BusinessId`)
 - `PUT /api/business/{id}` - Update business (requires authentication)
 - `DELETE /api/business/{id}` - Delete business (requires authentication)
 - `GET /api/business/my-businesses` - Get current user's businesses (requires authentication)
@@ -166,16 +168,25 @@ Once the application is running, access the Swagger UI at:
 - `POST /api/business/{id}/posts` - Create a post for a business (requires authentication)
 - `GET /api/business/{id}/insights` - Get business analytics (owner only)
 - `POST /api/business/reviews/{reviewId}/report` - Report a review (requires authentication)
+- `POST /api/business/{id}/products` - Add a product/service to a business (requires authentication, owner only; no price/cart data)
+- `PUT /api/business/{id}/products/{productId}` - Update a product/service (requires authentication, owner only)
+- `DELETE /api/business/{id}/products/{productId}` - Delete a product/service (requires authentication, owner only)
 
-#### Admin Dashboard (7 endpoints, requires admin role)
+#### Admin Dashboard (12 endpoints, requires admin role)
 
 - `GET /api/admin/businesses/pending` - View pending business approvals
 - `POST /api/admin/businesses/{id}/approve` - Approve or reject a business
 - `GET /api/admin/analytics` - Get platform-wide analytics
 - `GET /api/admin/businesses` - View all businesses with filters
+- `POST /api/admin/businesses` - Admin directly creates a business for an owner (`OwnerId` + the usual business fields, auto-generates `BusinessId`)
+- `PUT /api/admin/businesses/{id}` - Full admin edit: location (Area/Road/Street/Address/Lat/Long), status, `IsActive`, category/subcategory assignment, and basic product/service list management
+- `GET /api/admin/businesses/by-business-id/{businessId}` - Look up a business by its permanent Linkoja `BusinessId` (e.g. `LNK0101001001`)
+- `PUT /api/admin/businesses/{id}/activate` - Activate a business (sets `IsActive = true`)
+- `PUT /api/admin/businesses/{id}/deactivate` - Deactivate a business (sets `IsActive = false`)
 - `DELETE /api/admin/businesses/{id}` - Delete a business
 - `GET /api/admin/reports/reviews` - View review reports (supports `?status=pending`)
 - `PUT /api/admin/reports/reviews/{reportId}/resolve` - Resolve report (`?action=dismiss` or `?action=delete-review`)
+
 
 #### Notifications (4 endpoints, requires authentication)
 

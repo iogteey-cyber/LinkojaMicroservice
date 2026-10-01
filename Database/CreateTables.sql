@@ -54,6 +54,26 @@ CREATE INDEX IF NOT EXISTS "idx_businesses_status" ON "Businesses"("Status");
 CREATE INDEX IF NOT EXISTS "idx_businesses_category" ON "Businesses"("Category");
 CREATE INDEX IF NOT EXISTS "idx_businesses_location" ON "Businesses"("Latitude", "Longitude");
 
+-- Additive columns: contact/branding fields present on the Business model but missing
+-- from the original schema (pre-existing gap, fixed here since it blocks all business
+-- queries on a fresh database).
+ALTER TABLE "Businesses" ADD COLUMN IF NOT EXISTS "email" VARCHAR(255);
+ALTER TABLE "Businesses" ADD COLUMN IF NOT EXISTS "website" VARCHAR(500);
+
+-- Additive columns: structured location (Area/Road/Street), permanent Linkoja BusinessId,
+-- and IsActive (separate from Status) for admin activate/deactivate.
+ALTER TABLE "Businesses" ADD COLUMN IF NOT EXISTS "Area" VARCHAR(150);
+ALTER TABLE "Businesses" ADD COLUMN IF NOT EXISTS "Road" VARCHAR(150);
+ALTER TABLE "Businesses" ADD COLUMN IF NOT EXISTS "Street" VARCHAR(150);
+ALTER TABLE "Businesses" ADD COLUMN IF NOT EXISTS "BusinessId" VARCHAR(20);
+ALTER TABLE "Businesses" ADD COLUMN IF NOT EXISTS "IsActive" BOOLEAN NOT NULL DEFAULT TRUE;
+
+CREATE UNIQUE INDEX IF NOT EXISTS "idx_businesses_businessid" ON "Businesses"("BusinessId") WHERE "BusinessId" IS NOT NULL;
+CREATE INDEX IF NOT EXISTS "idx_businesses_area" ON "Businesses"("Area");
+CREATE INDEX IF NOT EXISTS "idx_businesses_road" ON "Businesses"("Road");
+CREATE INDEX IF NOT EXISTS "idx_businesses_street" ON "Businesses"("Street");
+CREATE INDEX IF NOT EXISTS "idx_businesses_isactive" ON "Businesses"("IsActive");
+
 -- =============================================
 -- Table: BusinessReviews
 -- Description: Stores customer reviews for businesses
@@ -127,6 +147,61 @@ CREATE TABLE IF NOT EXISTS "BusinessCategories" (
 
 CREATE INDEX IF NOT EXISTS "idx_categories_business" ON "BusinessCategories"("BusinessId");
 CREATE INDEX IF NOT EXISTS "idx_categories_name" ON "BusinessCategories"("CategoryName");
+
+-- Additive column: optional subcategory for a business-category assignment
+ALTER TABLE "BusinessCategories" ADD COLUMN IF NOT EXISTS "Subcategory" VARCHAR(100);
+CREATE INDEX IF NOT EXISTS "idx_categories_subcategory" ON "BusinessCategories"("Subcategory");
+
+-- =============================================
+-- Table: BusinessProducts
+-- Description: Purely descriptive catalogue of products/services offered by a business.
+-- Linkoja is NOT an e-commerce platform: no price, cart, checkout, order, or escrow data.
+-- =============================================
+CREATE TABLE IF NOT EXISTS "BusinessProducts" (
+    "Id" SERIAL PRIMARY KEY,
+    "BusinessId" INTEGER NOT NULL,
+    "Name" VARCHAR(255) NOT NULL,
+    "Description" TEXT,
+    "PhotoUrl" VARCHAR(500),
+    "Type" VARCHAR(20) NOT NULL DEFAULT 'Product', -- 'Product' or 'Service'
+    "CreatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "fk_product_business" FOREIGN KEY ("BusinessId") REFERENCES "Businesses"("Id") ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS "idx_products_business" ON "BusinessProducts"("BusinessId");
+CREATE INDEX IF NOT EXISTS "idx_products_name" ON "BusinessProducts"("Name");
+CREATE INDEX IF NOT EXISTS "idx_products_type" ON "BusinessProducts"("Type");
+
+-- =============================================
+-- Table: LocationCodes
+-- Description: Deterministic lookup assigning a stable 2-digit code to each distinct
+-- Area/Road/Street value, used to build the permanent Linkoja BusinessId.
+-- =============================================
+CREATE TABLE IF NOT EXISTS "LocationCodes" (
+    "Id" SERIAL PRIMARY KEY,
+    "Type" VARCHAR(20) NOT NULL, -- 'Area', 'Road', 'Street'
+    "Value" VARCHAR(150) NOT NULL, -- normalized (trimmed, lower-cased) location value
+    "Code" VARCHAR(2) NOT NULL,
+    "CreatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "unique_location_code" UNIQUE ("Type", "Value")
+);
+
+CREATE INDEX IF NOT EXISTS "idx_location_codes_type" ON "LocationCodes"("Type");
+
+-- =============================================
+-- Table: BusinessIdSequences
+-- Description: Tracks the next 4-digit sequence number for a given Area/Road/Street
+-- code combination so permanent BusinessIds increment correctly per location.
+-- =============================================
+CREATE TABLE IF NOT EXISTS "BusinessIdSequences" (
+    "Id" SERIAL PRIMARY KEY,
+    "AreaCode" VARCHAR(2) NOT NULL,
+    "RoadCode" VARCHAR(2) NOT NULL,
+    "StreetCode" VARCHAR(2) NOT NULL,
+    "NextSequence" INTEGER NOT NULL DEFAULT 1,
+    "UpdatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "unique_businessid_sequence" UNIQUE ("AreaCode", "RoadCode", "StreetCode")
+);
 
 -- =============================================
 -- Table: PasswordResetTokens
@@ -225,7 +300,7 @@ WHERE NOT EXISTS (
 -- =============================================
 -- Database Schema Complete
 -- =============================================
--- Total Tables: 11
+-- Total Tables: 13
 -- - Users
 -- - Businesses
 -- - BusinessReviews
@@ -236,4 +311,7 @@ WHERE NOT EXISTS (
 -- - Notifications
 -- - OtpVerifications
 -- - ReviewReports
+-- - BusinessProducts
+-- - LocationCodes
+-- - BusinessIdSequences
 -- =============================================

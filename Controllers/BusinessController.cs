@@ -57,26 +57,7 @@ namespace LinkojaMicroservice.Controllers
                     ).ToList();
                 }
 
-                var businessDtos = businesses.Select(b => new BusinessDto
-                {
-                    Id = b.Id,
-                    OwnerId = b.OwnerId,
-                    OwnerName = b.Owner?.Name,
-                    Name = b.Name,
-                    LogoUrl = b.LogoUrl,
-                    CoverPhotoUrl = b.CoverPhotoUrl,
-                    Description = b.Description,
-                    Category = b.Category,
-                    Address = b.Address,
-                    Latitude = b.Latitude,
-                    Longitude = b.Longitude,
-                    Status = b.Status,
-                    ReviewCount = b.Reviews?.Count ?? 0,
-                    AverageRating = b.Reviews?.Any() == true ? b.Reviews.Average(r => r.Rating) : 0,
-                    FollowerCount = b.Followers?.Count ?? 0,
-                    CreatedAt = b.CreatedAt,
-                    UpdatedAt = b.UpdatedAt
-                }).ToList();
+                var businessDtos = businesses.Select(MapToDto).ToList();
 
                 var response = ResponseStatus<List<BusinessDto>>.Create<BasicResponse<List<BusinessDto>>>("00", "Businesses fetched successfully", businessDtos, true);
                 return Ok(response);
@@ -109,26 +90,7 @@ namespace LinkojaMicroservice.Controllers
                     ).ToList();
                 }
                 
-                var businessDtos = businesses.Select(b => new BusinessDto
-                {
-                    Id = b.Id,
-                    OwnerId = b.OwnerId,
-                    OwnerName = b.Owner?.Name,
-                    Name = b.Name,
-                    LogoUrl = b.LogoUrl,
-                    CoverPhotoUrl = b.CoverPhotoUrl,
-                    Description = b.Description,
-                    Category = b.Category,
-                    Address = b.Address,
-                    Latitude = b.Latitude,
-                    Longitude = b.Longitude,
-                    Status = b.Status,
-                    ReviewCount = b.Reviews?.Count ?? 0,
-                    AverageRating = b.Reviews?.Any() == true ? b.Reviews.Average(r => r.Rating) : 0,
-                    FollowerCount = b.Followers?.Count ?? 0,
-                    CreatedAt = b.CreatedAt,
-                    UpdatedAt = b.UpdatedAt
-                }).ToList();
+                var businessDtos = businesses.Select(MapToDto).ToList();
 
                 var response = ResponseStatus<List<BusinessDto>>.Create<BasicResponse<List<BusinessDto>>>("00", "Businesses fetched successfully", businessDtos, true);
                 return Ok(response);
@@ -146,26 +108,7 @@ namespace LinkojaMicroservice.Controllers
             try
             {
                 var business = await _businessService.GetBusinessById(id);
-                var businessDto = new BusinessDto
-                {
-                    Id = business.Id,
-                    OwnerId = business.OwnerId,
-                    OwnerName = business.Owner?.Name,
-                    Name = business.Name,
-                    LogoUrl = business.LogoUrl,
-                    CoverPhotoUrl = business.CoverPhotoUrl,
-                    Description = business.Description,
-                    Category = business.Category,
-                    Address = business.Address,
-                    Latitude = business.Latitude,
-                    Longitude = business.Longitude,
-                    Status = business.Status,
-                    ReviewCount = business.Reviews?.Count ?? 0,
-                    AverageRating = business.Reviews?.Any() == true ? business.Reviews.Average(r => r.Rating) : 0,
-                    FollowerCount = business.Followers?.Count ?? 0,
-                    CreatedAt = business.CreatedAt,
-                    UpdatedAt = business.UpdatedAt
-                };
+                var businessDto = MapToDto(business);
 
                 var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business fetched successfully", businessDto, true);
                 return Ok(response);
@@ -474,26 +417,7 @@ namespace LinkojaMicroservice.Controllers
             try
             {
                 var business = await _businessService.GetBusinessByEmail(email);
-                var dto = new BusinessDto
-                {
-                    Id = business.Id,
-                    OwnerId = business.OwnerId,
-                    OwnerName = business.Owner?.Name,
-                    Name = business.Name,
-                    LogoUrl = business.LogoUrl,
-                    CoverPhotoUrl = business.CoverPhotoUrl,
-                    Description = business.Description,
-                    Category = business.Category,
-                    Address = business.Address,
-                    Latitude = business.Latitude,
-                    Longitude = business.Longitude,
-                    Status = business.Status,
-                    ReviewCount = business.Reviews?.Count ??0,
-                    AverageRating = business.Reviews?.Any() == true ? business.Reviews.Average(r => r.Rating) :0,
-                    FollowerCount = business.Followers?.Count ??0,
-                    CreatedAt = business.CreatedAt,
-                    UpdatedAt = business.UpdatedAt
-                };
+                var dto = MapToDto(business);
                 var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business fetched successfully", dto, true);
                 return Ok(response);
             }
@@ -515,26 +439,7 @@ namespace LinkojaMicroservice.Controllers
             try
             {
                 var business = await _businessService.GetBusinessByPhone(phone);
-                var dto = new BusinessDto
-                {
-                    Id = business.Id,
-                    OwnerId = business.OwnerId,
-                    OwnerName = business.Owner?.Name,
-                    Name = business.Name,
-                    LogoUrl = business.LogoUrl,
-                    CoverPhotoUrl = business.CoverPhotoUrl,
-                    Description = business.Description,
-                    Category = business.Category,
-                    Address = business.Address,
-                    Latitude = business.Latitude,
-                    Longitude = business.Longitude,
-                    Status = business.Status,
-                    ReviewCount = business.Reviews?.Count ??0,
-                    AverageRating = business.Reviews?.Any() == true ? business.Reviews.Average(r => r.Rating) :0,
-                    FollowerCount = business.Followers?.Count ??0,
-                    CreatedAt = business.CreatedAt,
-                    UpdatedAt = business.UpdatedAt
-                };
+                var dto = MapToDto(business);
                 var response = ResponseStatus<BusinessDto>.Create<BasicResponse<BusinessDto>>("00", "Business fetched successfully", dto, true);
                 return Ok(response);
             }
@@ -571,5 +476,174 @@ namespace LinkojaMicroservice.Controllers
         {
             return degrees * Math.PI / 180.0;
         }
+
+        internal static BusinessDto MapToDto(Business business)
+        {
+            return new BusinessDto
+            {
+                Id = business.Id,
+                BusinessId = business.BusinessId,
+                OwnerId = business.OwnerId,
+                OwnerName = business.Owner?.Name,
+                Name = business.Name,
+                LogoUrl = business.LogoUrl,
+                CoverPhotoUrl = business.CoverPhotoUrl,
+                Description = business.Description,
+                Category = business.Category,
+                Address = business.Address,
+                Area = business.Area,
+                Road = business.Road,
+                Street = business.Street,
+                Latitude = business.Latitude,
+                Longitude = business.Longitude,
+                Status = business.Status,
+                IsActive = business.IsActive,
+                ReviewCount = business.Reviews?.Count ?? 0,
+                AverageRating = business.Reviews?.Any() == true ? business.Reviews.Average(r => r.Rating) : 0,
+                FollowerCount = business.Followers?.Count ?? 0,
+                CreatedAt = business.CreatedAt,
+                UpdatedAt = business.UpdatedAt,
+                Email = business.email,
+                Website = business.website,
+                Categories = business.BusinessCategories?.Select(c => new BusinessCategoryDto
+                {
+                    CategoryName = c.CategoryName,
+                    Subcategory = c.Subcategory
+                }).ToList() ?? new List<BusinessCategoryDto>(),
+                Products = business.Products?.Select(p => new BusinessProductDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    PhotoUrl = p.PhotoUrl,
+                    Type = p.Type
+                }).ToList() ?? new List<BusinessProductDto>()
+            };
+        }
+
+        internal static BusinessProductDto MapToProductDto(BusinessProduct product)
+        {
+            return new BusinessProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                PhotoUrl = product.PhotoUrl,
+                Type = product.Type
+            };
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchBusinesses(
+            [FromQuery] string? q = null,
+            [FromQuery] string? category = null,
+            [FromQuery] string? subcategory = null,
+            [FromQuery] string? area = null,
+            [FromQuery] string? road = null,
+            [FromQuery] string? street = null,
+            [FromQuery] double? latitude = null,
+            [FromQuery] double? longitude = null,
+            [FromQuery] double? radiusKm = null)
+        {
+            try
+            {
+                var businesses = await _businessService.SearchBusinesses(
+                    q, category, subcategory, area, road, street, latitude, longitude, radiusKm);
+
+                var businessDtos = businesses.Select(MapToDto).ToList();
+
+                var response = ResponseStatus<List<BusinessDto>>.Create<BasicResponse<List<BusinessDto>>>("00", "Businesses fetched successfully", businessDtos, true);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while searching businesses", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("{id}/products")]
+        public async Task<IActionResult> AddProduct(int id, [FromBody] CreateBusinessProductRequest request)
+        {
+            try
+            {
+                var userId = GetUserId();
+                var product = await _businessService.AddProduct(id, userId, request);
+                var productDto = MapToProductDto(product);
+                var response = ResponseStatus<BusinessProductDto>.Create<BasicResponse<BusinessProductDto>>("00", "Product/service added successfully", productDto, true);
+                return CreatedAtAction(nameof(GetBusinessById), new { id = id }, response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while adding the product/service", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("{id}/products/{productId}")]
+        public async Task<IActionResult> UpdateProduct(int id, int productId, [FromBody] UpdateBusinessProductRequest request)
+        {
+            try
+            {
+                var userId = GetUserId();
+                var product = await _businessService.UpdateProduct(id, productId, userId, request);
+                var productDto = MapToProductDto(product);
+                var response = ResponseStatus<BusinessProductDto>.Create<BasicResponse<BusinessProductDto>>("00", "Product/service updated successfully", productDto, true);
+                return Ok(response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while updating the product/service", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("{id}/products/{productId}")]
+        public async Task<IActionResult> DeleteProduct(int id, int productId)
+        {
+            try
+            {
+                var userId = GetUserId();
+                await _businessService.DeleteProduct(id, productId, userId);
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("00", "Product/service deleted successfully", null, true);
+                return Ok(response);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("04", ex.Message, null, false);
+                return NotFound(response);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (Exception ex)
+            {
+                var response = ResponseStatus<object>.Create<BasicResponse<object>>("99", "An error occurred while deleting the product/service", new { error = ex.Message }, false);
+                return StatusCode(500, response);
+            }
+        }
     }
 }
+

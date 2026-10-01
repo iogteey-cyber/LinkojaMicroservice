@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace LinkojaMicroservice.DTOs
@@ -17,6 +18,12 @@ namespace LinkojaMicroservice.DTOs
         public string Category { get; set; }
         
         public string Address { get; set; }
+
+        public string Area { get; set; }
+
+        public string Road { get; set; }
+
+        public string Street { get; set; }
         
         public double? Latitude { get; set; }
         
@@ -37,6 +44,9 @@ namespace LinkojaMicroservice.DTOs
         public string Description { get; set; }
         public string Category { get; set; }
         public string Address { get; set; }
+        public string Area { get; set; }
+        public string Road { get; set; }
+        public string Street { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         [EmailAddress]
@@ -44,9 +54,46 @@ namespace LinkojaMicroservice.DTOs
         public string Website { get; set; }
     }
 
+    public class BusinessCategoryDto
+    {
+        public string CategoryName { get; set; }
+        public string Subcategory { get; set; }
+    }
+
+    public class BusinessProductDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string PhotoUrl { get; set; }
+        public string Type { get; set; } // "Product" or "Service"
+    }
+
+    public class CreateBusinessProductRequest
+    {
+        [Required]
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string PhotoUrl { get; set; }
+
+        [RegularExpression("^(Product|Service)$", ErrorMessage = "Type must be 'Product' or 'Service'")]
+        public string Type { get; set; } = "Product";
+    }
+
+    public class UpdateBusinessProductRequest
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string PhotoUrl { get; set; }
+
+        [RegularExpression("^(Product|Service)$", ErrorMessage = "Type must be 'Product' or 'Service'")]
+        public string Type { get; set; }
+    }
+
     public class BusinessDto
     {
         public int Id { get; set; }
+        public string BusinessId { get; set; }
         public int OwnerId { get; set; }
         public string OwnerName { get; set; }
         public string Name { get; set; }
@@ -55,9 +102,13 @@ namespace LinkojaMicroservice.DTOs
         public string Description { get; set; }
         public string Category { get; set; }
         public string Address { get; set; }
+        public string Area { get; set; }
+        public string Road { get; set; }
+        public string Street { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public string Status { get; set; }
+        public bool IsActive { get; set; }
         public int ReviewCount { get; set; }
         public double AverageRating { get; set; }
         public int FollowerCount { get; set; }
@@ -65,6 +116,8 @@ namespace LinkojaMicroservice.DTOs
         public DateTime UpdatedAt { get; set; }
         public string Email { get; set; }
         public string Website { get; set; }
+        public List<BusinessCategoryDto> Categories { get; set; } = new List<BusinessCategoryDto>();
+        public List<BusinessProductDto> Products { get; set; } = new List<BusinessProductDto>();
     }
 
     public class CreateReviewRequest

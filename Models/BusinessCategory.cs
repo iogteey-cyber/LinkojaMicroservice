@@ -10,7 +10,9 @@ namespace LinkojaMicroservice.Models
         public Business Business { get; set; }
         
         public string CategoryName { get; set; }
-        
+
+        public string Subcategory { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
