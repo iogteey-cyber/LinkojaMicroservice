@@ -73,21 +73,21 @@ namespace LinkojaMicroservice.DTOs
     {
         [Required]
         public string Name { get; set; }
-        public string Description { get; set; }
-        public string PhotoUrl { get; set; }
+        public string? Description { get; set; }
+        public string? PhotoUrl { get; set; }
 
         [RegularExpression("^(Product|Service)$", ErrorMessage = "Type must be 'Product' or 'Service'")]
-        public string Type { get; set; } = "Product";
+        public string? Type { get; set; } = "Product";
     }
 
     public class UpdateBusinessProductRequest
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string PhotoUrl { get; set; }
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public string? PhotoUrl { get; set; }
 
         [RegularExpression("^(Product|Service)$", ErrorMessage = "Type must be 'Product' or 'Service'")]
-        public string Type { get; set; }
+        public string? Type { get; set; }
     }
 
     public class BusinessDto

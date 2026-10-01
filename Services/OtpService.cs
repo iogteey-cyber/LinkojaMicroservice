@@ -3,6 +3,7 @@ using LinkojaMicroservice.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,6 +16,12 @@ namespace LinkojaMicroservice.Services
         private readonly ISmsService _smsService;
         private readonly ILogger<OtpService> _logger;
 
+        // Fixed test phone numbers that always use a known OTP and skip the real SMS
+        // gateway, so QA/testing isn't blocked on third-party SMS delivery. Not
+        // intended for production phone numbers.
+        private static readonly HashSet<string> TestPhoneNumbers = new HashSet<string> { "07065838412" };
+        private const string TestOtpCode = "123456";
+
         public OtpService(ApplicationDbContext context, IEmailService emailService, ISmsService smsService, ILogger<OtpService> logger)
         {
             _context = context;
@@ -26,10 +33,12 @@ namespace LinkojaMicroservice.Services
         public async Task<bool> SendOtp(string phoneNumber)
         {
             _logger.LogInformation("Sending OTP to phone number: {PhoneNumber}", phoneNumber);
-            
-            // Generate a 6-digit OTP
+
+            var isTestNumber = TestPhoneNumbers.Contains(phoneNumber);
+
+            // Generate a 6-digit OTP (fixed value for designated test numbers)
             var random = new Random();
-            var otpCode = random.Next(100000, 999999).ToString();
+            var otpCode = isTestNumber ? TestOtpCode : random.Next(100000, 999999).ToString();
 
             // Check if there's an existing OTP for this phone number
             var existingOtp = await _context.OtpVerifications
@@ -62,6 +71,13 @@ namespace LinkojaMicroservice.Services
             }
 
             await _context.SaveChangesAsync();
+
+            if (isTestNumber)
+            {
+                // Skip SMS/email delivery entirely for designated test numbers.
+                _logger.LogInformation("Test phone number {PhoneNumber} detected - using fixed OTP, skipping SMS/email delivery", phoneNumber);
+                return true;
+            }
 
             // Send OTP via SMS using Termii
             try

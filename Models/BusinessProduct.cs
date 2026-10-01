@@ -15,9 +15,9 @@ namespace LinkojaMicroservice.Models
         [Required]
         public string Name { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        public string PhotoUrl { get; set; }
+        public string? PhotoUrl { get; set; }
 
         // "Product" or "Service"
         public string Type { get; set; } = "Product";
