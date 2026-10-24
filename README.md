@@ -151,6 +151,14 @@ Once the application is running, access the Swagger UI at:
 - `POST /api/verification/verify-otp` - Verify OTP code (requires authentication)
 - `POST /api/verification/resend-otp` - Resend OTP (60-second cooldown)
 
+OTP delivery channel: by default (`OtpSettings:PreferEmail = true`), if the
+phone number belongs to a registered user with an email address, the OTP is
+sent via **email first** (no per-message SMS cost, faster/more reliable
+delivery). SMS (Termii) is used automatically as a fallback whenever email
+delivery fails, is disabled via configuration, or no email is on file yet for
+that phone number (e.g. first-time verification before an account exists).
+Request/response shapes are unchanged.
+
 #### Business Management (19 endpoints)
 
 - `GET /api/business` - Get all businesses (supports category, status, geolocation filters)

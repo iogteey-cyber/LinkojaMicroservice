@@ -33,7 +33,10 @@ namespace LinkojaMicroservice
             
             // Configure Termii SMS settings
             services.Configure<TermiiSettings>(Configuration.GetSection("TermiiSettings"));
-            
+
+            // Configure OTP delivery preferences (email-first by default)
+            services.Configure<LinkojaMicroservice.Models.OtpSettings>(Configuration.GetSection("OtpSettings"));
+
             // Configure Google OAuth settings
             services.Configure<GoogleOAuthSettings>(Configuration.GetSection("GoogleOAuthSettings"));
 
