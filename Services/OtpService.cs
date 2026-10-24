@@ -2,6 +2,7 @@ using LinkojaMicroservice.Data;
 using LinkojaMicroservice.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace LinkojaMicroservice.Services
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
         private readonly ISmsService _smsService;
+        private readonly OtpSettings _otpSettings;
         private readonly ILogger<OtpService> _logger;
 
         // Fixed test phone numbers that always use a known OTP and skip the real SMS
@@ -22,11 +24,12 @@ namespace LinkojaMicroservice.Services
         private static readonly HashSet<string> TestPhoneNumbers = new HashSet<string> { "07065838412" };
         private const string TestOtpCode = "123456";
 
-        public OtpService(ApplicationDbContext context, IEmailService emailService, ISmsService smsService, ILogger<OtpService> logger)
+        public OtpService(ApplicationDbContext context, IEmailService emailService, ISmsService smsService, IOptions<OtpSettings> otpSettings, ILogger<OtpService> logger)
         {
             _context = context;
             _emailService = emailService;
             _smsService = smsService;
+            _otpSettings = otpSettings.Value;
             _logger = logger;
         }
 
@@ -79,7 +82,38 @@ namespace LinkojaMicroservice.Services
                 return true;
             }
 
-            // Send OTP via SMS using Termii
+            // Determine delivery channel: email is the default/preferred channel
+            // (no per-message SMS gateway cost and typically faster/more reliable
+            // delivery) whenever the phone number is linked to a user with an
+            // email address. SMS is used as the fallback - either because email
+            // delivery is disabled via configuration, or no email is on file yet
+            // for this phone number (e.g. first-time phone verification before
+            // an account/email exists).
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Phone == phoneNumber);
+            var canUseEmail = _otpSettings.PreferEmail && user != null && !string.IsNullOrEmpty(user.Email);
+
+            if (canUseEmail)
+            {
+                try
+                {
+                    var emailSent = await _emailService.SendOtpEmailAsync(user.Email, otpCode);
+                    if (emailSent)
+                    {
+                        _logger.LogInformation("OTP sent successfully via email to user with phone: {PhoneNumber}", phoneNumber);
+                        return true;
+                    }
+
+                    _logger.LogWarning("Email delivery failed for OTP to phone: {PhoneNumber}, falling back to SMS", phoneNumber);
+                    // fall through to SMS below
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send OTP via email for phone: {PhoneNumber}, falling back to SMS", phoneNumber);
+                    // fall through to SMS below
+                }
+            }
+
+            // Send OTP via SMS using Termii (fallback, or primary channel when no email is on file)
             try
             {
                 var smsMessage = $"Your Linkoja verification code is: {otpCode}. This code expires in 10 minutes.";
@@ -91,27 +125,12 @@ namespace LinkojaMicroservice.Services
                 }
                 else
                 {
-                    _logger.LogWarning("Failed to send OTP via SMS to {PhoneNumber}, will attempt email backup", phoneNumber);
+                    _logger.LogWarning("Failed to send OTP via SMS to {PhoneNumber}", phoneNumber);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send OTP via SMS to {PhoneNumber}", phoneNumber);
-            }
-
-            // Also send via email as backup (if user has email with this phone)
-            try
-            {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Phone == phoneNumber);
-                if (user != null && !string.IsNullOrEmpty(user.Email))
-                {
-                    await _emailService.SendOtpEmailAsync(user.Email, otpCode);
-                    _logger.LogInformation("OTP sent via email backup to user with phone: {PhoneNumber}", phoneNumber);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send OTP email backup for phone: {PhoneNumber}", phoneNumber);
             }
 
             return true;

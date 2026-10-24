@@ -19,7 +19,7 @@ namespace LinkojaMicroservice.Services
             _logger = logger;
         }
 
-        public async Task SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true)
+        public async Task<bool> SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true)
         {
             try
             {
@@ -43,16 +43,18 @@ namespace LinkojaMicroservice.Services
 
                     await client.SendMailAsync(mailMessage);
                     _logger.LogInformation("Email successfully sent to {ToEmail}", toEmail);
+                    return true;
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send email to {ToEmail}: {ErrorMessage}", toEmail, ex.Message);
-                // Don't throw to prevent blocking the main operation
+                // Don't throw to prevent blocking the main operation; caller decides how to handle failure (e.g. fallback channel)
+                return false;
             }
         }
 
-        public async Task SendPasswordResetEmailAsync(string toEmail, string resetToken)
+        public async Task<bool> SendPasswordResetEmailAsync(string toEmail, string resetToken)
         {
             var subject = "Password Reset Request - Linkoja";
             var body = $@"
@@ -76,10 +78,10 @@ namespace LinkojaMicroservice.Services
                 </html>
             ";
 
-            await SendEmailAsync(toEmail, subject, body);
+            return await SendEmailAsync(toEmail, subject, body);
         }
 
-        public async Task SendOtpEmailAsync(string toEmail, string otpCode)
+        public async Task<bool> SendOtpEmailAsync(string toEmail, string otpCode)
         {
             var subject = "Your Verification Code - Linkoja";
             var body = $@"
@@ -102,10 +104,10 @@ namespace LinkojaMicroservice.Services
                 </html>
             ";
 
-            await SendEmailAsync(toEmail, subject, body);
+            return await SendEmailAsync(toEmail, subject, body);
         }
 
-        public async Task SendBusinessApprovalEmailAsync(string toEmail, string businessName, string status, string reason = null)
+        public async Task<bool> SendBusinessApprovalEmailAsync(string toEmail, string businessName, string status, string reason = null)
         {
             var subject = status == "verified" 
                 ? $"Congratulations! Your Business '{businessName}' Has Been Approved - Linkoja" 
@@ -166,10 +168,10 @@ namespace LinkojaMicroservice.Services
                 ";
             }
 
-            await SendEmailAsync(toEmail, subject, body);
+            return await SendEmailAsync(toEmail, subject, body);
         }
 
-        public async Task SendWelcomeEmailAsync(string toEmail, string userName)
+        public async Task<bool> SendWelcomeEmailAsync(string toEmail, string userName)
         {
             var subject = "Welcome to Linkoja!";
             var body = $@"
@@ -197,7 +199,7 @@ namespace LinkojaMicroservice.Services
                 </html>
             ";
 
-            await SendEmailAsync(toEmail, subject, body);
+            return await SendEmailAsync(toEmail, subject, body);
         }
     }
 }

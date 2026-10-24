@@ -108,6 +108,21 @@ For production, change the JWT key in `appsettings.json`:
 }
 ```
 
+### 3b. Configure SMTP (Gmail)
+
+`SmtpSettings` in `appsettings.json` defaults to Gmail (`smtp.gmail.com:587`).
+Gmail **requires a 16-character App Password**, not your regular account
+password, whenever 2-Step Verification is enabled (and Google no longer
+supports "less secure app" passwords at all). Using the regular account
+password will fail with SMTP error `535-5.7.8 Username and Password not
+accepted`.
+
+To generate one: enable 2-Step Verification on the Gmail account, then visit
+[myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+and create an App Password for "Mail". Set it as `SmtpSettings:Password` via
+an environment variable (`SmtpSettings__Password`) or a local,
+git-ignored config file — **never commit real SMTP credentials**.
+
 ### 4. Install Dependencies
 
 ```bash
@@ -150,6 +165,14 @@ Once the application is running, access the Swagger UI at:
 - `POST /api/verification/send-otp` - Send OTP to phone number
 - `POST /api/verification/verify-otp` - Verify OTP code (requires authentication)
 - `POST /api/verification/resend-otp` - Resend OTP (60-second cooldown)
+
+OTP delivery channel: by default (`OtpSettings:PreferEmail = true`), if the
+phone number belongs to a registered user with an email address, the OTP is
+sent via **email first** (no per-message SMS cost, faster/more reliable
+delivery). SMS (Termii) is used automatically as a fallback whenever email
+delivery fails, is disabled via configuration, or no email is on file yet for
+that phone number (e.g. first-time verification before an account exists).
+Request/response shapes are unchanged.
 
 #### Business Management (19 endpoints)
 
