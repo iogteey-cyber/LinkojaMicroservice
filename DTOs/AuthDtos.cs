@@ -12,10 +12,10 @@ namespace LinkojaMicroservice.DTOs
         [MinLength(6)]
         public string Password { get; set; }
 
-        public string Phone { get; set; }
-        
-        public string Name { get; set; }
-        public string SocialId { get; set; }
+        public string? Phone { get; set; }
+
+        public string? Name { get; set; }
+        public string? SocialId { get; set; }
     }
 
     public class LoginRequest

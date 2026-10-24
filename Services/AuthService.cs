@@ -29,7 +29,7 @@ namespace LinkojaMicroservice.Services
             _googleOAuthService = googleOAuthService;
         }
 
-        public async Task<User> Register(string email, string password, string phone, string name, string socialId)
+        public async Task<User> Register(string email, string password, string? phone, string? name, string? socialId)
         {
             // Check if user already exists
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
